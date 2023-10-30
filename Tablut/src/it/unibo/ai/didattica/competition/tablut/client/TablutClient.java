@@ -16,7 +16,7 @@ import it.unibo.ai.didattica.competition.tablut.util.Configuration;
 import it.unibo.ai.didattica.competition.tablut.util.StreamUtils;
 
 /**
- * Classe astratta di un client per il gioco
+ * Classe astratta di un client per il gioco Tablut
  * 
  * @author Andrea Piretti
  *
