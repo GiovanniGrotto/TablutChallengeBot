@@ -3,9 +3,7 @@ package it.unibo.ai.didattica.competition.tablut.customizations;
 import it.unibo.ai.didattica.competition.tablut.domain.Action;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class GameModel implements aima.core.search.adversarial.Game<CustomState, Action, CustomState.Turn>{
 
@@ -51,12 +49,14 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         // calcolo le mosse che può fare ogni pezzo e genero altri pezzi lì
         // TODO: controllare che convertChessPosition funzioni bene e che anche i for genera mosse usino i,j bene e che siano passati bene quando si crea new Action
         List<Action> allMoves = new ArrayList<>();
+        State.Turn turn = state.getTurn();
         for(Piece piece : pieces) {
+            // prendo la posizione da dove parte il pezzo che sto considerando
             String fromTile = convertToChessPosition(piece.row, piece.col);
-            State.Turn turn = state.getTurn();
             try {
                 // Move up
                 for (int i = piece.row - 1; i >= 0; i--) {
+                    // prendo la posizione dove finirà il pezzo che sto considerando
                     String toTile = convertToChessPosition(i, piece.col);
                     allMoves.add(new Action(fromTile, toTile, turn));
                 }
@@ -91,6 +91,48 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
                 legalMoves.add(action);
             }catch (Exception e){
                 e.printStackTrace();
+            }
+        }
+
+        return legalMoves;
+    }
+
+    //In a 2D array in Java, the first index (i) typically represents the row, and the second index (j) represents the column
+    public List<Action> getActions2(CustomState state) {
+        State.Pawn[][] board = state.getBoard();
+        List<Piece> pieces = new ArrayList<>();
+        List<Piece> emptyTiles = new ArrayList<>();
+        State.Turn turn = state.getTurn();
+        Set<Integer> forbiddenTile = new HashSet<>(Arrays.asList(new Integer[]{3, 4, 5, 13, 27, 35, 36, 37, 43, 44, 45, 53, 67, 75, 76, 77, 40}));
+
+        // Scorriamo la board e salviamo in pieces solo i pezzi del colore del turno attuale e le celle vuote che troviamo
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board.length; j++) {
+                State.Pawn piece = board[i][j];
+                if ((Objects.equals(turn, State.Turn.WHITE) && (Objects.equals(piece, State.Pawn.WHITE))) || Objects.equals(piece, State.Pawn.KING)
+                        || (Objects.equals(turn, State.Turn.BLACK) && Objects.equals(piece, State.Pawn.BLACK))) {
+                    pieces.add(new Piece(turn.toString(), i, j));
+                } else if (Objects.equals(piece, State.Pawn.EMPTY) && !forbiddenTile.contains(i * 9 + j)) { //controllo di non aggiungere trono o camp dei neri dove sicuro non possono andare i pezzi con mosse legali
+                    emptyTiles.add(new Piece(State.Pawn.EMPTY.toString(), i, j));
+                }
+            }
+        }
+
+        //Per ogni pezzo creiamo una mossa che parte da dov'è e arriva in ognuna delle caselle vuote e controlliamo sia una mossa legale
+        List<Action> legalMoves = new ArrayList<>();
+        for(Piece piece : pieces){
+            String fromTile = convertToChessPosition(piece.row, piece.col);
+            for(Piece emptyTile : emptyTiles){
+                // Se sono cambiate sia la colonna che la riga è una mossa orizzontale quindi illegale per definizione
+                if(emptyTile.row!=piece.row && emptyTile.col!=piece.col) continue;
+                String toTile = convertToChessPosition(emptyTile.row, emptyTile.col);
+                try{
+                    Action action = new Action(fromTile, toTile, turn);
+                    state.getRules().checkMove(state, action);
+                    legalMoves.add(action);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         }
 
