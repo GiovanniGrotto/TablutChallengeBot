@@ -11,7 +11,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         if (row < 1 || row > 9 || col < 1 || col > 9) {
             return "Invalid position";
         }
-        char columnChar = (char) ('a' + col - 1);
+        char columnChar = (char) ('a' + col-1);
         return columnChar + Integer.toString(row);
     }
 
@@ -52,30 +52,30 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         State.Turn turn = state.getTurn();
         for(Piece piece : pieces) {
             // prendo la posizione da dove parte il pezzo che sto considerando
-            String fromTile = convertToChessPosition(piece.row, piece.col);
+            String fromTile = convertToChessPosition(piece.row+1, piece.col+1);
             try {
                 // Move up
                 for (int i = piece.row - 1; i >= 0; i--) {
                     // prendo la posizione dove finirà il pezzo che sto considerando
-                    String toTile = convertToChessPosition(i, piece.col);
+                    String toTile = convertToChessPosition(i+1, piece.col+1);
                     allMoves.add(new Action(fromTile, toTile, turn));
                 }
 
                 // Move down
                 for (int i = piece.row + 1; i < 9; i++) {
-                    String toTile = convertToChessPosition(i, piece.col);
+                    String toTile = convertToChessPosition(i+1, piece.col+1);
                     allMoves.add(new Action(fromTile, toTile, turn));
                 }
 
                 // Move left
                 for (int j = piece.col - 1; j >= 0; j--) {
-                    String toTile = convertToChessPosition(piece.row, j);
+                    String toTile = convertToChessPosition(piece.row+1, j+1);
                     allMoves.add(new Action(fromTile, toTile, turn));
                 }
 
                 // Move right
                 for (int j = piece.col + 1; j < 9; j++) {
-                    String toTile = convertToChessPosition(piece.row, j);
+                    String toTile = convertToChessPosition(piece.row+1, j+1);
                     allMoves.add(new Action(fromTile, toTile, turn));
                 }
             }catch (Exception e){
@@ -87,10 +87,10 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         List<Action> legalMoves = new ArrayList<>();
         for(Action action: allMoves){
             try{
-                state.getRules().checkMove(state, action);
+                state.getRules().checkMove(state.clone(), action);
                 legalMoves.add(action);
             }catch (Exception e){
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
 
@@ -142,7 +142,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
     @Override
     public CustomState getResult(CustomState state, Action action) {
         try {
-            return (CustomState) state.getRules().checkMove(state, action);
+            return (CustomState) state.getRules().checkMove(state.clone(), action);
         }catch (Exception e){
             e.printStackTrace();
         }
