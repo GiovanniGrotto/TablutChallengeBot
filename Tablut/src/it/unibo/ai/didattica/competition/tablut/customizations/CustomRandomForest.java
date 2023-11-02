@@ -19,9 +19,9 @@ public class CustomRandomForest {
 
 
     public static void main(String[] argv) throws Exception {
-        DataSource source = new DataSource("C:\\Users\\Utente ASUS\\Desktop\\TablutChallengeBot\\Tablut\\src\\it\\unibo\\ai\\didattica\\competition\\tablut\\customizations\\db.arff");
+        DataSource source = new DataSource("Tablut/src/it/unibo/ai/didattica/competition/tablut/customizations/serialized_data.arff");
         Instances data = source.getDataSet();
-        data.setClassIndex(data.numAttributes() - 1);
+        data.setClassIndex(0);
         rf.buildClassifier(new Instances(data));
 
         ArrayList<Prediction> res=ev.getTrainTestPredictions(rf,data,data);
