@@ -13,6 +13,11 @@
             <classpath>
                 <pathelement path="lib/gson-2.2.2.jar" />
                 <pathelement path="lib/commons-cli-1.4.jar" />
+                <pathelement path="lib/aima-core.jar" />
+                <pathelement path="lib/weka.jar" />
+                <pathelement path="lib/jackson-annotations-2.16.0-rc1.jar" />
+                <pathelement path="lib/jackson-core-2.16.0-rc1.jar" />
+                <pathelement path="lib/jackson-databind-2.16.0-rc1.jar" />
             </classpath>
         </javac>
         <copy todir="build">
@@ -106,6 +111,17 @@
         <java classname="it.unibo.ai.didattica.competition.tablut.tester.Tester" fork="true">
             <classpath>
                 <pathelement location="lib/gson-2.2.2.jar"/>
+                <pathelement location="build"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="sigmazero">
+        <java classname="it.unibo.ai.didattica.competition.tablut.client.TablutAIClient" fork="true">
+<!--            <arg line="${args}"/>-->
+            <classpath>
+                <pathelement location="lib/gson-2.2.2.jar"/>
+                <pathelement location="lib/aima-core.jar"/>
                 <pathelement location="build"/>
             </classpath>
         </java>

@@ -127,7 +127,12 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
             else return 1-evaluation;
         }
        // EVALUATION FUNCTION QUI
-        evaluation = Math.random();
+
+        try {
+            evaluation = CustomRandomForest.evaluate(state);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         this.stateEvaluationMap.put(state.toString(), evaluation);
         return evaluation;
     }
