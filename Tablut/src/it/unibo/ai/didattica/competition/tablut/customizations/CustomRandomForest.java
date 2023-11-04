@@ -8,6 +8,7 @@ import weka.classifiers.trees.RandomForest;
 import weka.core.*;
 import weka.core.converters.ConverterUtils.DataSource;
 
+import java.io.File;
 import java.util.ArrayList;
 
 
@@ -24,13 +25,15 @@ public class CustomRandomForest {
 
     static {
         System.out.println(System.getProperty("user.dir"));
+        System.out.println(System.getProperty("user.home"));
     }
 
     static {
         try {
-            data_no_label = new DataSource("../serialized_data.arff").getDataSet();
+            String filename=System.getProperty("user.home")+ File.separator + "serialized_data.arff";
+            data_no_label = new DataSource(filename).getDataSet();
             data_no_label.setClassIndex(0);
-            System.out.println(System.getProperty("user.dir"));
+            System.out.println(System.getProperty("user.home"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -38,7 +41,8 @@ public class CustomRandomForest {
 
     static {
         try {
-            data = new DataSource("serialized_data.arff").getDataSet();
+            String filename=System.getProperty("user.dir")+ File.separator + "serialized_data.arff";
+            data = new DataSource(filename).getDataSet();
             data.setClassIndex(0);
             System.out.println(System.getProperty("user.dir"));
         } catch (Exception e) {
