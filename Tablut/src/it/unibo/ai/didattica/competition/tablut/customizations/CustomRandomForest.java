@@ -24,7 +24,7 @@ public class CustomRandomForest {
 
     static {
         try {
-            data_no_label = new DataSource("Tablut/src/it/unibo/ai/didattica/competition/tablut/customizations/serialized_data.arff").getDataSet();
+            data_no_label = new DataSource("serialized_data.arff").getDataSet();
             data_no_label.setClassIndex(0);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -33,7 +33,7 @@ public class CustomRandomForest {
 
     static {
         try {
-            data = new DataSource("Tablut/src/it/unibo/ai/didattica/competition/tablut/customizations/serialized_data.arff").getDataSet();
+            data = new DataSource("serialized_data.arff").getDataSet();
             data.setClassIndex(0);
         } catch (Exception e) {
             throw new RuntimeException(e);
