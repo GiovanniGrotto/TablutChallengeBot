@@ -23,9 +23,14 @@ public class CustomRandomForest {
     static public Instances data;
 
     static {
+        System.out.println(System.getProperty("user.dir"));
+    }
+
+    static {
         try {
-            data_no_label = new DataSource("serialized_data.arff").getDataSet();
+            data_no_label = new DataSource("../serialized_data.arff").getDataSet();
             data_no_label.setClassIndex(0);
+            System.out.println(System.getProperty("user.dir"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -35,6 +40,7 @@ public class CustomRandomForest {
         try {
             data = new DataSource("serialized_data.arff").getDataSet();
             data.setClassIndex(0);
+            System.out.println(System.getProperty("user.dir"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -169,8 +175,8 @@ public class CustomRandomForest {
 
     public static void main(String[] argv) throws Exception {
 
-        trainModel();
+        //trainModel();
         //quando abbiamo finito lo esportiamo
-        exportModel(rf);
+        //exportModel(rf);
     }
 }
