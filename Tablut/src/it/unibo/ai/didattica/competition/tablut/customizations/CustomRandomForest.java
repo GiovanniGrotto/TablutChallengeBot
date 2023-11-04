@@ -31,6 +31,7 @@ public class CustomRandomForest {
     static {
         try {
             String filename=System.getProperty("user.dir")+ File.separator + "serialized_data.arff";
+            System.out.println(filename);
             data = new DataSource(filename).getDataSet();
             data.setClassIndex(0);
             System.out.println(System.getProperty("user.dir"));
