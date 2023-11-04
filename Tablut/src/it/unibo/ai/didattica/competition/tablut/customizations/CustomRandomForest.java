@@ -42,11 +42,11 @@ public class CustomRandomForest {
 
     static {
         try {
-            String filename=System.getProperty("user.home")+ File.separator + "serialized_data.arff";
+            String filename=System.getProperty("user.dir")+ File.separator + "serialized_data.arff";
             System.out.println(filename);
             data_no_label = new DataSource(filename).getDataSet();
             data_no_label.setClassIndex(0);
-            System.out.println(System.getProperty("user.home"));
+            System.out.println(System.getProperty("user.dir"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
