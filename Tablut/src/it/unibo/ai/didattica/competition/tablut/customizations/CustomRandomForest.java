@@ -17,8 +17,8 @@ import java.util.ArrayList;
 public class CustomRandomForest {
 
     static public RandomForest rf = new RandomForest();
-
-    static public Classifier randomForest = CustomRandomForest.importModel(System.getProperty("user.dir")+ File.separator + "trainedModel.model");
+    static public Classifier randomForest = CustomRandomForest.importModel("/data/data/com.termux/files/home/storage/downloads/trainedModel.model");
+   // static public Classifier randomForest = CustomRandomForest.importModel(System.getProperty("user.dir")+ File.separator + "trainedModel.model");
     static public EvaluationUtils ev = new EvaluationUtils();
 
     static public Evaluation evaluation;

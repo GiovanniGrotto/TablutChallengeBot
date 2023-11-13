@@ -84,9 +84,32 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
     }
 
     @Override
-    public CustomState getResult(CustomState state, Action action) {
+    public CustomState getResult(CustomState originalState, Action a) {
         try {
-            return (CustomState) state.getRules().checkMove(state.clone(), action);
+            CustomState state = originalState.clone();
+            State.Pawn pawn = state.getPawn(a.getRowFrom(), a.getColumnFrom());
+		    State.Pawn[][] newBoard = state.getBoard();
+            // State newState = new State();
+            // libero il trono o una casella qualunque
+            if (a.getColumnFrom() == 4 && a.getRowFrom() == 4) {
+                newBoard[a.getRowFrom()][a.getColumnFrom()] = State.Pawn.THRONE;
+            } else {
+                newBoard[a.getRowFrom()][a.getColumnFrom()] = State.Pawn.EMPTY;
+            }
+
+            // metto nel nuovo tabellone la pedina mossa
+            newBoard[a.getRowTo()][a.getColumnTo()] = pawn;
+            // aggiorno il tabellone
+            state.setBoard(newBoard);
+            // cambio il turno
+            if (state.getTurn().equalsTurn(State.Turn.WHITE.toString())) {
+                state.setTurn(State.Turn.BLACK);
+            } else {
+                state.setTurn(State.Turn.WHITE);
+            }
+
+            return state;
+            //return (CustomState) originalState.getRules().checkMove(originalState.clone(), action);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -123,14 +146,13 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         Double evaluation = this.stateEvaluationMap.get(state.toString());
         //TODO: check se la logica è corretta
         if (evaluation != null){
-//            if(turn == State.Turn.WHITE) return evaluation;
-//            else return 1-evaluation;
             return evaluation;
         }
        // EVALUATION FUNCTION QUI
 
         try {
             evaluation = CustomRandomForest.evaluate(state);
+            if(turn == State.Turn.BLACK) evaluation = 1 - evaluation;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
