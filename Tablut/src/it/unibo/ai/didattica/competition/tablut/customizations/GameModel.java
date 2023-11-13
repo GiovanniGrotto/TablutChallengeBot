@@ -123,8 +123,9 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         Double evaluation = this.stateEvaluationMap.get(state.toString());
         //TODO: check se la logica è corretta
         if (evaluation != null){
-            if(turn == State.Turn.WHITE) return evaluation;
-            else return 1-evaluation;
+//            if(turn == State.Turn.WHITE) return evaluation;
+//            else return 1-evaluation;
+            return evaluation;
         }
        // EVALUATION FUNCTION QUI
 

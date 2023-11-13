@@ -2,8 +2,10 @@ package it.unibo.ai.didattica.competition.tablut.customizations;
 
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.classifiers.evaluation.Prediction;
+import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.trees.RandomForest;
 import weka.core.*;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -16,8 +18,10 @@ public class CustomRandomForest {
 
     static public RandomForest rf = new RandomForest();
 
-    static public Classifier randomForest = CustomRandomForest.importModel("trainedModel.model");
+    static public Classifier randomForest = CustomRandomForest.importModel(System.getProperty("user.dir")+ File.separator + "trainedModel.model");
     static public EvaluationUtils ev = new EvaluationUtils();
+
+    static public Evaluation evaluation;
 
     static public Instances data_no_label;
 
@@ -157,32 +161,128 @@ public class CustomRandomForest {
 
 
 //        //Divido in trainSet e testSet
-//        double splitPercentage=0.8;
-//        int trainSize = (int) Math.round(data.size()* splitPercentage );
-//        Instances trainData= new Instances( data, 0, trainSize );
-//        Instances testData= new Instances(data, trainSize, data.size()-trainSize );
+        double splitPercentage=0.7;
+        int trainSize = (int) Math.round(data.size()* splitPercentage );
+        Instances testData= new Instances( data, 0, trainSize );
+        //Instances testData= new Instances(data, trainSize, data.size()-trainSize );
 //
 //        endTime = System.currentTimeMillis();
 //        System.out.println("Processed data in " + (endTime - startTime) + "ms");
 
         //Training del modello
+        rf.setMaxDepth(100);
         startTime=System.currentTimeMillis();
         rf.buildClassifier(new Instances(data));
         endTime = System.currentTimeMillis();
         System.out.println("Trained model in " + (endTime - startTime) + "ms");
+        //trainSetMSRE();
+        //testSetMSRE(testData);
     }
 
     public static void trainSetMSRE() throws Exception {
         ArrayList<Prediction> predictions=ev.getTrainTestPredictions(rf,data,data);
         double msre=MeanSquareRootErrorCalculator.calculateMSRE(predictions);
-        System.out.println("MSRE training 100%: " + msre);
+        System.out.println("MSRE on train set: " + msre);
+    }
+
+    public static void testSetMSRE(Instances testSet) throws Exception {
+        ArrayList<Prediction> predictions=ev.getTrainTestPredictions(rf,data,testSet);
+        double msre=MeanSquareRootErrorCalculator.calculateMSRE(predictions);
+        System.out.println("MSRE on test set: " + msre);
+    }
+
+    public static void tuneRandomForest() throws Exception {
+        DataSource source = new DataSource("Tablut/src/it/unibo/ai/didattica/competition/tablut/customizations/serialized_data.arff");
+        Instances data = source.getDataSet();
+        data.setClassIndex(0);
+        data.randomize(new java.util.Random());
+//
+//        //TUNING NUMBER OF TREES ----------> DEFAULT IS FINE
+//        int[] numTreesValues = {10, 25, 50, 75, 100, 150, 200};
+//        for (int numTrees : numTreesValues) {
+//            RandomForest randomForest = new RandomForest();
+//            randomForest.setNumIterations(numTrees);
+//
+//            // Train the model
+//            randomForest.buildClassifier(data);
+//
+//            System.out.println("Number of Trees: " + numTrees);
+//            ArrayList<Prediction> predictions=ev.getTrainTestPredictions(randomForest,data,data);
+//            double msre=MeanSquareRootErrorCalculator.calculateMSRE(predictions);
+//            System.out.println("MSRE with "+numTrees+" trees: " + msre);
+//            System.out.println("-------------------------");
+//        }
+
+        //TUNING MAX DEPTH OF TREES ----------> 100 IS FINE
+        int[] maxDepthValues = {100, 200, 300};
+        for (int maxDepth : maxDepthValues) {
+            RandomForest randomForest = new RandomForest();
+            randomForest.setMaxDepth(maxDepth);
+
+            // Train the model
+            randomForest.buildClassifier(data);
+
+            System.out.println("Max depth: " + maxDepth);
+            ArrayList<Prediction> predictions=ev.getTrainTestPredictions(randomForest,data,data);
+            double msre=MeanSquareRootErrorCalculator.calculateMSRE(predictions);
+            System.out.println("MSRE: " + msre);
+            System.out.println("-------------------------");
+        }
+    }
+
+    public static void crossValidation() throws Exception {
+        evaluation=new Evaluation(data);
+        evaluation.crossValidateModel(rf, data, 10, new java.util.Random(1));
+        System.out.println("Mean Squared Error: " + evaluation.meanAbsoluteError());
+        System.out.println("Root Mean Squared Error: " + evaluation.rootMeanSquaredError());
+    }
+
+    public static void trainNN() throws Exception {
+
+        long startTime;
+        long endTime;
+        //Carico il dataset
+        DataSource source = new DataSource("Tablut/src/it/unibo/ai/didattica/competition/tablut/customizations/serialized_data.arff");
+        Instances data = source.getDataSet();
+        //Setto quale attributo corrisponde alla label
+        data.setClassIndex(0);
+        //Shuffle del dataset
+        data.randomize(new java.util.Random());
+
+
+        MultilayerPerceptron neuralNetwork = new MultilayerPerceptron();
+
+        // Set the options for the neural network
+        neuralNetwork.setOptions(weka.core.Utils.splitOptions("-L 0.001 -M 0.9 -N 400 -V 0 -S 0 -E 20 -H \"150,20\""));
+
+        // Solver "adam" is not directly available in Weka, but the above options should be a good starting point.
+        // Please refer to the Weka documentation for more details on available options.
+
+        // Train the neural network
+        startTime=System.currentTimeMillis();
+        System.out.println("Start time: "+startTime);
+        neuralNetwork.buildClassifier(data);
+        endTime=System.currentTimeMillis();
+        System.out.println("End time: "+endTime);
+
+        evaluation=new Evaluation(data);
+        evaluation.crossValidateModel(neuralNetwork, data, 10, new java.util.Random(1));
+        System.out.println("Mean Squared Error: " + evaluation.meanAbsoluteError());
+        System.out.println("Root Mean Squared Error: " + evaluation.rootMeanSquaredError());
+
     }
 
 
     public static void main(String[] argv) throws Exception {
 
+        //tuneRandomForest();
         //trainModel();
+        //crossValidation();
         //quando abbiamo finito lo esportiamo
         //exportModel(rf);
+
+
+        trainNN();
+
     }
 }
