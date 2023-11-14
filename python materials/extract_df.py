@@ -7,14 +7,13 @@ def extract_game_info(file_path):
     with open(file_path, 'r') as file:
         file_lines = file.readlines()
         current_result = file_lines[-1].strip()
-        if len(current_result) != 2:
+        if len(current_result) != 2 and current_result != 'D':
             return None
         for num, line in enumerate(file_lines, 1):
             if "Stato:" in line:
                 current_board_state = str(file_lines[num:num+9]).replace("[", "").replace("]", "").replace("'", "").replace("\\n", "").replace(" ", "").replace(",", "")
                 current_turn = str(file_lines[num+10]).replace("\n", "")
                 game_info_list.append({"state": current_board_state, "turn":current_turn, "result": current_result})
-    # Non ritorno l'ultima board perchè è quella vincente e sarà controllata dall'evaluation con le regole de gioco
     return game_info_list[:-1]
 
 
@@ -54,7 +53,7 @@ def write_csv(csv_file, fieldnames, data):
 
 def main():
     # Example usage:
-    folder_path = 'C:\\Users\\giova\\OneDrive\\Desktop\\games'  # Replace with the path to your folder
+    folder_path = 'C:\\Users\\giova\\OneDrive\\Desktop\\TablutChallengeBot\\python materials\\games'  # Replace with the path to your folder
     # Get a list of all files in the folder
     file_paths = [os.path.join(folder_path, filename) for filename in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, filename))]
 
@@ -66,7 +65,7 @@ def main():
     final_games_info = list(filter(lambda item: item is not None, games_info))
     final_games_info = list(filter(lambda item: len(item) > 4, final_games_info))
     flat_list = [item for sublist in final_games_info for item in sublist]
-    write_csv("C:\\Users\\giova\\OneDrive\\Desktop\\raw_data.csv", ["result", "state", "turn"], flat_list)
+    write_csv("C:\\Users\\giova\\OneDrive\\Desktop\\TablutChallengeBot\\python materials\\raw_data.csv", ["result", "state", "turn"], flat_list)
     print()
 
 
