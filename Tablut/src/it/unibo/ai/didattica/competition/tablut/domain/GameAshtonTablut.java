@@ -10,6 +10,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import it.unibo.ai.didattica.competition.tablut.customizations.*;
 
 import it.unibo.ai.didattica.competition.tablut.exceptions.*;
 
@@ -749,5 +750,63 @@ public class GameAshtonTablut implements Game {
 		this.loggGame.fine("Stato:\n"+state.toString());
 	}
 
+	public CustomState makeMove(State state, Action a) {
+        try {
+            State.Pawn pawn = state.getPawn(a.getRowFrom(), a.getColumnFrom());
+		    State.Pawn[][] newBoard = state.getBoard();
+            // libero il trono o una casella qualunque
+            if (a.getColumnFrom() == 4 && a.getRowFrom() == 4) {
+                newBoard[a.getRowFrom()][a.getColumnFrom()] = State.Pawn.THRONE;
+            } else {
+                newBoard[a.getRowFrom()][a.getColumnFrom()] = State.Pawn.EMPTY;
+            }
+            // metto nel nuovo tabellone la pedina mossa
+            newBoard[a.getRowTo()][a.getColumnTo()] = pawn;
+            // aggiorno il tabellone
+            state.setBoard(newBoard);
+            // cambio il turno
+            if (state.getTurn().equalsTurn(State.Turn.WHITE.toString())) {
+                state.setTurn(State.Turn.BLACK);
+            } else {
+                state.setTurn(State.Turn.WHITE);
+            }
+
+			//controllo catture e vincita
+			if (state.getTurn().equalsTurn("W")) {
+			state = this.checkCaptureBlack(state, a);
+			} else if (state.getTurn().equalsTurn("B")) {
+				state = this.checkCaptureWhite(state, a);
+			}
+
+			// if something has been captured, clear cache for draws
+			if (this.movesWithutCapturing == 0) {
+				this.drawConditions.clear();
+				this.loggGame.fine("Capture! Draw cache cleared!");
+			}
+
+			// controllo pareggio
+			int trovati = 0;
+			for (State s : drawConditions) {
+				if (s.equals(state)) {
+					trovati++;
+					if (trovati > repeated_moves_allowed) {
+						state.setTurn(State.Turn.DRAW);
+						break;
+					}
+				}
+			}
+
+			if (cache_size >= 0 && this.drawConditions.size() > cache_size) {
+				this.drawConditions.remove(0);
+			}
+			this.drawConditions.add(state.clone());
+
+            return (CustomState)state;
+            //return (CustomState) originalState.getRules().checkMove(originalState.clone(), action);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }

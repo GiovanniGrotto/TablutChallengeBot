@@ -12,6 +12,7 @@ import it.unibo.ai.didattica.competition.tablut.exceptions.OccupitedException;
 import it.unibo.ai.didattica.competition.tablut.exceptions.PawnException;
 import it.unibo.ai.didattica.competition.tablut.exceptions.StopException;
 import it.unibo.ai.didattica.competition.tablut.exceptions.ThroneException;
+import it.unibo.ai.didattica.competition.tablut.customizations.CustomState;
 
 /**
  * Contains the rules of the game
@@ -52,4 +53,6 @@ public interface Game {
 			ThroneException, OccupitedException, ClimbingCitadelException, CitadelException;
 
 	public void endGame(State state);
+
+	public CustomState makeMove(State state, Action a);
 }

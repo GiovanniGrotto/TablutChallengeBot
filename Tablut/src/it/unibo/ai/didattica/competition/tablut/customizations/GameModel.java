@@ -85,35 +85,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
 
     @Override
     public CustomState getResult(CustomState originalState, Action a) {
-        try {
-            CustomState state = originalState.clone();
-            State.Pawn pawn = state.getPawn(a.getRowFrom(), a.getColumnFrom());
-		    State.Pawn[][] newBoard = state.getBoard();
-            // State newState = new State();
-            // libero il trono o una casella qualunque
-            if (a.getColumnFrom() == 4 && a.getRowFrom() == 4) {
-                newBoard[a.getRowFrom()][a.getColumnFrom()] = State.Pawn.THRONE;
-            } else {
-                newBoard[a.getRowFrom()][a.getColumnFrom()] = State.Pawn.EMPTY;
-            }
-
-            // metto nel nuovo tabellone la pedina mossa
-            newBoard[a.getRowTo()][a.getColumnTo()] = pawn;
-            // aggiorno il tabellone
-            state.setBoard(newBoard);
-            // cambio il turno
-            if (state.getTurn().equalsTurn(State.Turn.WHITE.toString())) {
-                state.setTurn(State.Turn.BLACK);
-            } else {
-                state.setTurn(State.Turn.WHITE);
-            }
-
-            return state;
-            //return (CustomState) originalState.getRules().checkMove(originalState.clone(), action);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
+        return originalState.getRules().makeMove(originalState, a);        
     }
 
     @Override
