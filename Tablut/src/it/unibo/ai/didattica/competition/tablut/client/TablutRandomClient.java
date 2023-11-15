@@ -75,7 +75,7 @@ public class TablutRandomClient extends TablutClient {
 		try {
 			this.declareName();
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		State state;
@@ -97,7 +97,7 @@ public class TablutRandomClient extends TablutClient {
 		case 4:
 			state = new StateTablut();
 			state.setTurn(State.Turn.WHITE);
-			rules = new GameAshtonTablut(99, 0, "garbage", "fake", "fake");
+			rules = new GameAshtonTablut(0, 0, "garbage", "fake", "fake");
 			System.out.println("Ashton Tablut game");
 			break;
 		default:
@@ -190,7 +190,7 @@ public class TablutRandomClient extends TablutClient {
 						this.write(a);
 					} catch (ClassNotFoundException | IOException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						//e.printStackTrace();
 					}
 					pawns.clear();
 					empty.clear();
@@ -277,7 +277,7 @@ public class TablutRandomClient extends TablutClient {
 						this.write(a);
 					} catch (ClassNotFoundException | IOException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						//e.printStackTrace();
 					}
 					pawns.clear();
 					empty.clear();

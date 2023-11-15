@@ -13,7 +13,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
     private final LimitedHashMap<String, Double> stateEvaluationMap; //= new LimitedHashMap<>(1000000);
     {
         try {
-            stateEvaluationMap = new LimitedHashMap<>(1000000, "stateEvaluation.json", "stateEvaluation");
+            stateEvaluationMap = new LimitedHashMap<>(2000000, "stateEvaluation.json", "stateEvaluation");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -22,7 +22,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
     private final LimitedHashMap<String, List<Action>> stateActionsMap; //= new LimitedHashMap<>(1000000);
     {
         try {
-            stateActionsMap = new LimitedHashMap<>(1000000, "stateAction.json", "stateAction");
+            stateActionsMap = new LimitedHashMap<>(2000000, "stateAction.json", "stateAction");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -85,7 +85,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
 
     @Override
     public CustomState getResult(CustomState originalState, Action a) {
-        return originalState.getRules().makeMove(originalState, a);        
+        return originalState.getRules().makeMove(originalState.clone(), a);
     }
 
     @Override

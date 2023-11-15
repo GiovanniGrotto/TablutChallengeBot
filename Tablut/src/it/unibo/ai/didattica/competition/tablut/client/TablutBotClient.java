@@ -36,6 +36,7 @@ public class TablutBotClient extends TablutClient{
         if (args.length == 2) {
             System.out.println(args[1]);
             timeout = Integer.parseInt(args[1]);
+
         }
         if (args.length == 3) {
             ipAddress = args[2];
@@ -52,7 +53,7 @@ public class TablutBotClient extends TablutClient{
         try {
             this.declareName();
         } catch (Exception e) {
-            e.printStackTrace();
+            ////e.printStackTrace();
         }
         //System.out.println("Running...");
 
@@ -73,7 +74,7 @@ public class TablutBotClient extends TablutClient{
                 try {
                     this.write(bestAction);
                 } catch (ClassNotFoundException | IOException e) {
-                    e.printStackTrace();
+                    ////e.printStackTrace();
                 }
             }
         }
@@ -81,6 +82,7 @@ public class TablutBotClient extends TablutClient{
 
     public CustomState getCustomCurrentState() {
         State state = getCurrentState();
-        return new CustomState(new GameAshtonTablut(99, 0, "garbage", "fake", "fake"), state);
+        return new CustomState(new GameAshtonTablut(0, 0, "garbage", "fake", "fake"), state);
     }
+
 }
