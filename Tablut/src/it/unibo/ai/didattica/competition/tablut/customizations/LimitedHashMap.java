@@ -9,7 +9,7 @@ import java.util.*;
 import java.io.*;
 
 public class LimitedHashMap<K, V> extends LinkedHashMap<K, V> {
-    private int maxSize = 1000000;
+    private int maxSize = 2000000;
 
     public LimitedHashMap(int maxSize) {
         this.maxSize = maxSize;

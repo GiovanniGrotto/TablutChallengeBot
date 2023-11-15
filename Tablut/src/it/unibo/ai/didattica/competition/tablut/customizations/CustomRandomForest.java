@@ -17,9 +17,9 @@ import java.util.ArrayList;
 public class CustomRandomForest {
 
     static public RandomForest rf = new RandomForest();
-    static public Classifier randomForest = CustomRandomForest.importModel("/data/data/com.termux/files/home/storage/downloads/trainedModel.model");
+    //static public Classifier randomForest = CustomRandomForest.importModel("/data/data/com.termux/files/home/storage/downloads/trainedModel.model");
     //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
-   // static public Classifier randomForest = CustomRandomForest.importModel(System.getProperty("user.dir")+ File.separator + "trainedModel.model");
+    static public Classifier randomForest = CustomRandomForest.importModel(System.getProperty("user.dir")+ File.separator + "trainedModel.model");
     static public EvaluationUtils ev = new EvaluationUtils();
 
     static public Evaluation evaluation;
@@ -57,55 +57,53 @@ public class CustomRandomForest {
         }
     }
 
-    public static ArrayList<Integer> serializeState(State state) {
-        ArrayList<Integer> newState = new ArrayList<>();
-
+    public static Instance serializeState(State state, Instance instance) {
         // Assuming the board is 9x9
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
                 State.Pawn cell = state.getBoard()[i][j];
+                Integer index = (i * 9 + j) * 3;
                 if (cell == State.Pawn.WHITE) {
-                    newState.add(1);
-                    newState.add(0);
-                    newState.add(0);
+                    instance.setValue(index, 1);
+                    instance.setValue(index+1, 0);
+                    instance.setValue(index+2, 0);
+
                 } else if (cell == State.Pawn.BLACK) {
-                    newState.add(0);
-                    newState.add(1);
-                    newState.add(0);
+                    instance.setValue(index, 0);
+                    instance.setValue(index+1, 1);
+                    instance.setValue(index+2, 0);
+
                 } else if (cell == State.Pawn.KING) {
-                    newState.add(0);
-                    newState.add(0);
-                    newState.add(1);
+                    instance.setValue(index, 0);
+                    instance.setValue(index+1, 0);
+                    instance.setValue(index+2, 1);
+
                 } else {
-                    newState.add(0);
-                    newState.add(0);
-                    newState.add(0);
+                    instance.setValue(index, 0);
+                    instance.setValue(index+1, 0);
+                    instance.setValue(index+2, 0);
+
                 }
             }
         }
 
         // Append the turn
         if (state.getTurn()== State.Turn.WHITE){
-            newState.add(1);
+            instance.setValue(instance.numAttributes()-1, 1);
         }
         else {
-            newState.add(0);
+            instance.setValue(instance.numAttributes()-1, 0);
         }
-        return newState;
+        return instance;
     }
 
     public static Instance createStateInstance(State state) {
         // Create a Weka Instance
         Instance instance = new DenseInstance(data_no_label.numAttributes());
         instance.setDataset(data_no_label);
-        ArrayList<Integer> stateList= serializeState(state);
+        Instance newInstance = serializeState(state, instance);
 
-        // Set attribute values from the State object
-        for (int i = 1; i < 244; i++) {
-            instance.setValue(i, stateList.get(i));
-        }
-
-        return instance;
+        return newInstance;
     }
 
     public static double evaluate(State state) throws Exception {

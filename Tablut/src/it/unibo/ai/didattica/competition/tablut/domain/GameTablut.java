@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import it.unibo.ai.didattica.competition.tablut.customizations.CustomState;
 import it.unibo.ai.didattica.competition.tablut.exceptions.*;
 
 /**
@@ -42,7 +43,7 @@ public class GameTablut implements Game {
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 			System.exit(1);
 		}
 		this.loggGame = Logger.getLogger("GameLog");
@@ -74,7 +75,7 @@ public class GameTablut implements Game {
 		//controllo la mossa
 		if(a.getTo().length()!=2 || a.getFrom().length()!=2)
 		{
-			this.loggGame.warning("Formato mossa errato");
+			//this.loggGame.warning("Formato mossa errato");
 			throw new ActionException(a);
 		}
 		int columnFrom = a.getColumnFrom();
@@ -85,28 +86,28 @@ public class GameTablut implements Game {
 		//controllo se sono fuori dal tabellone
 		if(columnFrom>state.getBoard().length-1 || rowFrom>state.getBoard().length-1 || rowTo>state.getBoard().length-1 || columnTo>state.getBoard().length-1 || columnFrom<0 || rowFrom<0 || rowTo<0 || columnTo<0)
 		{
-			this.loggGame.warning("Mossa fuori tabellone");
+			//this.loggGame.warning("Mossa fuori tabellone");
 			throw new BoardException(a);			
 		}
 		
 		//controllo che non vada sul trono
 		if(state.getPawn(rowTo, columnTo).equalsPawn(State.Pawn.THRONE.toString()))
 		{
-			this.loggGame.warning("Mossa sul trono");
+			//this.loggGame.warning("Mossa sul trono");
 			throw new ThroneException(a);
 		}
 		
 		//controllo la casella di arrivo
 		if(!state.getPawn(rowTo, columnTo).equalsPawn(State.Pawn.EMPTY.toString()))
 		{
-			this.loggGame.warning("Mossa sopra una casella occupata");
+			//this.loggGame.warning("Mossa sopra una casella occupata");
 			throw new OccupitedException(a);
 		}
 		
 		//controllo se cerco di stare fermo
 		if(rowFrom==rowTo && columnFrom==columnTo)
 		{
-			this.loggGame.warning("Nessuna mossa");
+			//this.loggGame.warning("Nessuna mossa");
 			throw new StopException(a);
 		}
 		
@@ -115,7 +116,7 @@ public class GameTablut implements Game {
 		{
 			if(!state.getPawn(rowFrom, columnFrom).equalsPawn("W") && !state.getPawn(rowFrom, columnFrom).equalsPawn("K"))
 			{
-				this.loggGame.warning("Giocatore "+a.getTurn()+" cerca di muovere una pedina avversaria");
+				//this.loggGame.warning("Giocatore "+a.getTurn()+" cerca di muovere una pedina avversaria");
 				throw new PawnException(a);
 			}
 		}
@@ -123,7 +124,7 @@ public class GameTablut implements Game {
 		{
 			if(!state.getPawn(rowFrom, columnFrom).equalsPawn("B"))
 			{
-				this.loggGame.warning("Giocatore "+a.getTurn()+" cerca di muovere una pedina avversaria");
+				//this.loggGame.warning("Giocatore "+a.getTurn()+" cerca di muovere una pedina avversaria");
 				throw new PawnException(a);
 			}
 		}
@@ -131,7 +132,7 @@ public class GameTablut implements Game {
 		//controllo di non muovere in diagonale
 		if(rowFrom != rowTo && columnFrom != columnTo)
 		{
-			this.loggGame.warning("Mossa in diagonale");
+			//this.loggGame.warning("Mossa in diagonale");
 			throw new DiagonalException(a);
 		}
 		
@@ -144,7 +145,7 @@ public class GameTablut implements Game {
 				{
 					if(!state.getPawn(rowFrom, i).equalsPawn(State.Pawn.EMPTY.toString()))
 					{
-						this.loggGame.warning("Mossa che scavalca una pedina");
+						//this.loggGame.warning("Mossa che scavalca una pedina");
 						throw new ClimbingException(a);
 					}
 				}
@@ -155,7 +156,7 @@ public class GameTablut implements Game {
 				{
 					if(!state.getPawn(rowFrom, i).equalsPawn(State.Pawn.EMPTY.toString()))
 					{
-						this.loggGame.warning("Mossa che scavalca una pedina");
+						//this.loggGame.warning("Mossa che scavalca una pedina");
 						throw new ClimbingException(a);
 					}
 				}
@@ -169,7 +170,7 @@ public class GameTablut implements Game {
 				{
 					if(!state.getPawn(i, columnFrom).equalsPawn(State.Pawn.EMPTY.toString()) && !state.getPawn(i, columnFrom).equalsPawn(State.Pawn.THRONE.toString()))
 					{
-						this.loggGame.warning("Mossa che scavalca una pedina");
+						//this.loggGame.warning("Mossa che scavalca una pedina");
 						throw new ClimbingException(a);
 					}
 				}
@@ -180,7 +181,7 @@ public class GameTablut implements Game {
 				{
 					if(!state.getPawn(i, columnFrom).equalsPawn(State.Pawn.EMPTY.toString()) && !state.getPawn(i, columnFrom).equalsPawn(State.Pawn.THRONE.toString()))
 					{
-						this.loggGame.warning("Mossa che scavalca una pedina");
+						//this.loggGame.warning("Mossa che scavalca una pedina");
 						throw new ClimbingException(a);
 					}
 				}
@@ -327,7 +328,7 @@ public class GameTablut implements Game {
 		//controllo se mangio a destra
 		if(a.getColumnTo()<state.getBoard().length-2 && (state.getPawn(a.getRowTo(), a.getColumnTo()+1).equalsPawn("W")||state.getPawn(a.getRowTo(), a.getColumnTo()+1).equalsPawn("K")) && (state.getPawn(a.getRowTo(), a.getColumnTo()+2).equalsPawn("B")||state.getPawn(a.getRowTo(), a.getColumnTo()+2).equalsPawn("T")))
 		{
-			//nero-re-trono N.B. No indexOutOfBoundException perchè se il re si trovasse sul bordo il giocatore bianco avrebbe già vinto
+			//nero-re-trono N.B. No indexOutOfBoundException perchï¿½ se il re si trovasse sul bordo il giocatore bianco avrebbe giï¿½ vinto
 			if(state.getPawn(a.getRowTo(), a.getColumnTo()+1).equalsPawn("K") && state.getPawn(a.getRowTo(), a.getColumnTo()+2).equalsPawn("T"))
 			{
 				//ho circondato su 3 lati il re?
@@ -589,6 +590,7 @@ public class GameTablut implements Game {
 		this.loggGame.fine("Stato: "+state.toString());
 	}
 
-	
+	@Override
+	public CustomState makeMove(State state, Action a) {return (CustomState) state;}
 	
 }
