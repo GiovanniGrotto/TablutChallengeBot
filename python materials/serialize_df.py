@@ -17,21 +17,56 @@ def serialize_state(state):
     return new_state
 
 
-def serialize_data(df):
+def basic_label(row):
+    if row[1]['result'] == "WW":
+        result = 1.0
+    elif row[1]['result'] == "BW":
+        result = 0.0
+    else:
+        result = 0.5
+    return result
+
+
+def each_turn_label(row):
+    if row[1]['result'] == "WW":
+        if row[1]['turn'] == "W":
+            result = 1.0
+        else:
+            result = -1.0
+    elif row[1]['result'] == "BW":
+        if row[1]['turn'] == "B":
+            result = 1.0
+        else:
+            result = -1.0
+    else:
+        result = 0.0
+    return result
+
+
+#TODO
+def discount_basic_label(row):
+    if row[1]['result'] == "WW":
+        result = 1.0
+    elif row[1]['result'] == "BW":
+        result = 0.0
+    else:
+        result = 0.5
+    return result
+
+
+def serialize_data(df, label_type):
     new_df = []
 
     for row in df.iterrows():
         new_state = serialize_state(row[1]['state'])
         new_state += [0] if row[1]['turn'] == "W" else [1]
-        if row[1]['result'] == "WW":
-            result = 1
-        elif row[1]['result'] == "BW":
-            result = 0
-        else:
-            result = 0.5
+        if label_type == "basic_label":
+            result = basic_label(row)
+        elif label_type == "each_turn_label":
+            result = each_turn_label(row)
         new_df.append({'result': result, **{f'{i}': val for i, val in enumerate(new_state)}})
 
-    return pd.DataFrame(new_df, dtype=int)
+    return pd.DataFrame(new_df, dtype=float)
 
 
 def read_csv(csv_file):
@@ -40,12 +75,13 @@ def read_csv(csv_file):
     return df
 
 
+LABEL_TYPE = "basic_label" #basic_label, each_turn_label, discounted_label
 # La prima colonna è il risultato, e l'ultima il turno
 def main():
-    df = read_csv("C:\\Users\\giova\\OneDrive\\Desktop\\raw_data.csv")
-    serialize_df = read_csv("C:\\Users\\giova\\OneDrive\\Desktop\\serialized_data.csv")
-    serialize_df = serialize_data(df)
-    serialize_df.to_csv('serialized_data.csv', index=False)
+    df = read_csv("C:\\Users\\giova\\OneDrive\\Desktop\\TablutChallengeBot\\python materials\\raw_data.csv")
+    #serialize_df = read_csv(f"C:\\Users\\giova\\OneDrive\\Desktop\\TablutChallengeBot\\python materials\\serialized_data_{LABEL_TYPE}.csv")
+    serialize_df = serialize_data(df, LABEL_TYPE)
+    serialize_df.to_csv(f'serialized_data_{LABEL_TYPE}.csv', index=False)
 
 
 if __name__ == "__main__":
