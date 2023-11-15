@@ -45,7 +45,7 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
     @Override
     protected void incrementDepthLimit() {
         ++this.currDepthLimit;
-        System.out.println("Depth "+this.currDepthLimit+", time to evaluate states: "+this.evalTime);
+        //System.out.println("Depth "+this.currDepthLimit+", time to evaluate states: "+this.evalTime);
         this.game.getInitialState();
         this.evalTime = 0;
     }
