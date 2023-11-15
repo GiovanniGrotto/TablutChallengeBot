@@ -81,6 +81,24 @@ public abstract class State {
 	protected Pawn board[][];
 	protected Turn turn;
 
+	private Integer blackCaptures=0;
+	private Integer whitecaptures=0;
+	public Integer getBlackCaptures(){
+		return this.blackCaptures;
+	}
+
+	public void setBlackCaptures(Integer blackCaptures) {
+		this.blackCaptures = blackCaptures;
+	}
+
+	public Integer getWhitecaptures() {
+		return whitecaptures;
+	}
+
+	public void setWhitecaptures(Integer whitecaptures) {
+		this.whitecaptures = whitecaptures;
+	}
+
 	public State() {
 		super();
 	}
@@ -230,7 +248,7 @@ public abstract class State {
 			result = cons.newInstance(new Object[0]);
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		Pawn oldboard[][] = this.getBoard();

@@ -115,6 +115,20 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
                 }
             }
         }
+        if(turn == State.Turn.BLACK){
+            if(state.getBlackCaptures() > state.getWhitecaptures()) {
+                return 1.1;
+            }else if(state.getBlackCaptures() < state.getWhitecaptures()){
+                return -1.1;
+            }
+        }else if(turn == State.Turn.WHITE){
+            if(state.getBlackCaptures() > state.getWhitecaptures()) {
+                return -1.1;
+            }else if(state.getBlackCaptures() < state.getWhitecaptures()){
+                return 1.1;
+            }
+        }
+
         Double evaluation = this.stateEvaluationMap.get(state.toString());
         //TODO: check se la logica è corretta
         if (evaluation != null){

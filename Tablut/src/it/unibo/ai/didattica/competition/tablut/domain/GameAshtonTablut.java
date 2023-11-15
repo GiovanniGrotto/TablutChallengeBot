@@ -268,11 +268,12 @@ public class GameAshtonTablut implements Game {
 		// se sono arrivato qui, muovo la pedina
 		state = this.movePawn(state, a);
 
+		int[] captures = {0, 0};
 		// a questo punto controllo lo stato per eventuali catture
 		if (state.getTurn().equalsTurn("W")) {
-			state = this.checkCaptureBlack(state, a);
+			state = this.checkCaptureBlack(state, a, captures);
 		} else if (state.getTurn().equalsTurn("B")) {
-			state = this.checkCaptureWhite(state, a);
+			state = this.checkCaptureWhite(state, a, captures);
 		}
 
 		// if something has been captured, clear cache for draws
@@ -324,7 +325,7 @@ public class GameAshtonTablut implements Game {
 		return state;
 	}
 
-	private State checkCaptureWhite(State state, Action a) {
+	private State checkCaptureWhite(State state, Action a, int[] captures) {
 		// controllo se mangio a destra
 		if (a.getColumnTo() < state.getBoard().length - 2
 				&& state.getPawn(a.getRowTo(), a.getColumnTo() + 1).equalsPawn("B")
@@ -393,6 +394,10 @@ public class GameAshtonTablut implements Game {
 		}
 		// TODO: implement the winning condition of the capture of the last
 		// black checker
+
+		if(this.movesWithutCapturing == -1){
+			captures[0]++;
+		}
 
 		this.movesWithutCapturing++;
 		return state;
@@ -674,7 +679,7 @@ public class GameAshtonTablut implements Game {
 		return state;
 	}
 
-	private State checkCaptureBlack(State state, Action a) {
+	private State checkCaptureBlack(State state, Action a, int[] captures) {
 
 		this.checkCaptureBlackPawnRight(state, a);
 		this.checkCaptureBlackPawnLeft(state, a);
@@ -684,6 +689,10 @@ public class GameAshtonTablut implements Game {
 		this.checkCaptureBlackKingLeft(state, a);
 		this.checkCaptureBlackKingDown(state, a);
 		this.checkCaptureBlackKingUp(state, a);
+
+		if(this.movesWithutCapturing == -1){
+			captures[1]++;
+		}
 
 		this.movesWithutCapturing++;
 		return state;
@@ -771,11 +780,12 @@ public class GameAshtonTablut implements Game {
                 state.setTurn(State.Turn.WHITE);
             }
 
+			int[] captures = {0, 0};
 			//controllo catture e vincita
 			if (state.getTurn().equalsTurn("W")) {
-			state = this.checkCaptureBlack(state, a);
+			state = this.checkCaptureBlack(state, a, captures);
 			} else if (state.getTurn().equalsTurn("B")) {
-				state = this.checkCaptureWhite(state, a);
+				state = this.checkCaptureWhite(state, a, captures);
 			}
 
 			// if something has been captured, clear cache for draws
@@ -801,7 +811,19 @@ public class GameAshtonTablut implements Game {
 			}
 			this.drawConditions.add(state.clone());
 
-            return (CustomState) state;
+			CustomState returnState = (CustomState) state;
+			//Ci sono state catture da parte del bianco
+			if(captures[0] > 0){
+				returnState.setWhitecaptures(state.getWhitecaptures() + captures[0]);
+			}
+			//Ci sono state catture da parte del nero
+			else if(captures[1] > 0){
+				returnState.setBlackCaptures(state.getBlackCaptures() + captures[1]);
+			}
+			if((returnState.getWhitecaptures() + returnState.getBlackCaptures()) > 1){
+				return returnState;
+			}
+            return returnState;
             //return (CustomState) originalState.getRules().checkMove(originalState.clone(), action);
         }catch (Exception e){
             e.printStackTrace();

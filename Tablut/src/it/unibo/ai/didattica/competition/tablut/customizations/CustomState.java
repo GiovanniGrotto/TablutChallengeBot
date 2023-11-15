@@ -5,6 +5,9 @@ import it.unibo.ai.didattica.competition.tablut.domain.State;
 
 public class CustomState extends State {
     private final Game rules;
+    private Integer blackCaptures=0;
+    private Integer whitecaptures=0;
+
 
     public CustomState(Game rules, State state) {
         super();
@@ -15,6 +18,22 @@ public class CustomState extends State {
 
     public Game getRules(){
         return this.rules;
+    }
+
+    public Integer getBlackCaptures(){
+        return this.blackCaptures;
+    }
+
+    public void setBlackCaptures(Integer blackCaptures) {
+        this.blackCaptures = blackCaptures;
+    }
+
+    public Integer getWhitecaptures() {
+        return whitecaptures;
+    }
+
+    public void setWhitecaptures(Integer whitecaptures) {
+        this.whitecaptures = whitecaptures;
     }
 
     @Override
@@ -31,6 +50,5 @@ public class CustomState extends State {
 
         return customStateClone;
     }
-
 
 }
