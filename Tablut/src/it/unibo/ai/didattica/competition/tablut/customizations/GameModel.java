@@ -116,31 +116,6 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
             }
         }
 
-        Integer whitePieces = 0;
-        Integer blackPieces = 0;
-        State.Pawn[][] board = state.getBoard();
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                State.Pawn piece = board[i][j];
-                if (Objects.equals(piece, State.Pawn.WHITE)) {
-                    whitePieces++;
-                }else if (Objects.equals(piece, State.Pawn.BLACK)) {
-                    blackPieces++;
-                }
-            }
-        }
-        if(turn == State.Turn.WHITE){
-            if(whitePieces-8 > blackPieces-16)
-                return 1.1;
-            else if (whitePieces-8 < blackPieces-16)
-                return -1.1;
-        }else {
-            if(whitePieces-8 > blackPieces-16)
-                return -1.1;
-            else if (whitePieces-8 < blackPieces-16)
-                return +1.1;
-        }
-
         Double evaluation = this.stateEvaluationMap.get(state.toString());
         //TODO: check se la logica è corretta
         if (evaluation != null){
