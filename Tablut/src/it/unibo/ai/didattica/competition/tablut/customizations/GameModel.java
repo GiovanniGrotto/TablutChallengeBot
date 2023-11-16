@@ -117,15 +117,12 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         }
 
         Double evaluation = this.stateEvaluationMap.get(state.toString());
-        //TODO: check se la logica è corretta
         if (evaluation != null){
             return evaluation;
         }
-       // EVALUATION FUNCTION QUI
-
         try {
             evaluation = CustomRandomForest.evaluate(state);
-            if(turn == State.Turn.BLACK) evaluation = 1 - evaluation;
+            //if(turn == State.Turn.BLACK) evaluation = 1 - evaluation;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -141,7 +138,79 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         return columnChar + Integer.toString(row);
     }
 
-    public List<Action> getActionsBruteForce(CustomState state) {
+    // Nettamente più veloce delle altre
+    public List<Action> getActionsBruteForceEarlyStop(CustomState state) {
+        State.Pawn[][] board = state.getBoard();
+        List<Piece> pieces = new ArrayList<>();
+        State.Turn turn = state.getTurn();
+        Set<Integer> enemyPieceTile = new HashSet<>();
+        Set<Integer> playerPieceTile = new HashSet<>();
+        Set<Integer> forbiddenTile = new HashSet<>(Arrays.asList(new Integer[]{3, 4, 5, 13, 27, 35, 36, 37, 43, 44, 45, 53, 67, 75, 76, 77, 40}));
+
+
+        // Scorriamo la board e salviamo in pieces solo i pezzi del colore del turno attuale
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board.length; j++) {
+                State.Pawn piece = board[i][j];
+                if ((Objects.equals(turn, State.Turn.WHITE) && (Objects.equals(piece, State.Pawn.WHITE) || Objects.equals(piece, State.Pawn.KING)))
+                        || (Objects.equals(turn, State.Turn.BLACK) && Objects.equals(piece, State.Pawn.BLACK))) {
+                    pieces.add(new Piece(turn.toString(), i, j));
+                    playerPieceTile.add(i * 9 + j);
+                }else if ((Objects.equals(turn, State.Turn.WHITE) && Objects.equals(piece, State.Pawn.BLACK)) || (Objects.equals(turn, State.Turn.BLACK) && (Objects.equals(piece, State.Pawn.WHITE) || Objects.equals(piece, State.Pawn.KING)))) {
+                    enemyPieceTile.add(i * 9 + j);
+                }
+            }
+        }
+
+        List<Action> legalMoves = new ArrayList<>();
+        for(Piece piece : pieces) {
+            // prendo la posizione da dove parte il pezzo che sto considerando
+            String fromTile = convertToChessPosition(piece.row+1, piece.col+1);
+            try {
+                // Move up
+                for (int i = piece.row - 1; i >= 0; i--) {
+                    int pieceIndex = i * 9 + piece.col;
+                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
+                        // prendo la posizione dove finirà il pezzo che sto considerando
+                        String toTile = convertToChessPosition(i + 1, piece.col + 1);
+                        legalMoves.add(new Action(fromTile, toTile, turn));
+                    }else break;
+                }
+
+                // Move down
+                for (int i = piece.row + 1; i < 9; i++) {
+                    int pieceIndex = i * 9 + piece.col;
+                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
+                        String toTile = convertToChessPosition(i+1, piece.col+1);
+                        legalMoves.add(new Action(fromTile, toTile, turn));
+                    }else break;
+                }
+
+                // Move left
+                for (int j = piece.col - 1; j >= 0; j--) {
+                    int pieceIndex = piece.row * 9 + j;
+                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
+                        String toTile = convertToChessPosition(piece.row+1, j+1);
+                        legalMoves.add(new Action(fromTile, toTile, turn));
+                    }else break;
+                }
+
+                // Move right
+                for (int j = piece.col + 1; j < 9; j++) {
+                    int pieceIndex = piece.row * 9 + j;
+                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
+                        String toTile = convertToChessPosition(piece.row+1, j+1);
+                        legalMoves.add(new Action(fromTile, toTile, turn));
+                    }else break;
+                }
+            }catch (Exception e){
+                //e.printStackTrace();
+            }
+        }
+        return legalMoves;
+    }
+
+    /*public List<Action> getActionsBruteForce(CustomState state) {
         State.Pawn[][] board = state.getBoard();
         List<Piece> pieces = new ArrayList<>();
         String turnString = state.getTurn().toString();
@@ -243,77 +312,5 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
             }
         }
         return legalMoves;
-    }
-
-    // Nettamente più veloce delle altre
-    public List<Action> getActionsBruteForceEarlyStop(CustomState state) {
-        State.Pawn[][] board = state.getBoard();
-        List<Piece> pieces = new ArrayList<>();
-        State.Turn turn = state.getTurn();
-        Set<Integer> enemyPieceTile = new HashSet<>();
-        Set<Integer> playerPieceTile = new HashSet<>();
-        Set<Integer> forbiddenTile = new HashSet<>(Arrays.asList(new Integer[]{3, 4, 5, 13, 27, 35, 36, 37, 43, 44, 45, 53, 67, 75, 76, 77, 40}));
-
-
-        // Scorriamo la board e salviamo in pieces solo i pezzi del colore del turno attuale
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                State.Pawn piece = board[i][j];
-                if ((Objects.equals(turn, State.Turn.WHITE) && (Objects.equals(piece, State.Pawn.WHITE) || Objects.equals(piece, State.Pawn.KING)))
-                        || (Objects.equals(turn, State.Turn.BLACK) && Objects.equals(piece, State.Pawn.BLACK))) {
-                    pieces.add(new Piece(turn.toString(), i, j));
-                    playerPieceTile.add(i * 9 + j);
-                }else if ((Objects.equals(turn, State.Turn.WHITE) && Objects.equals(piece, State.Pawn.BLACK)) || (Objects.equals(turn, State.Turn.BLACK) && (Objects.equals(piece, State.Pawn.WHITE) || Objects.equals(piece, State.Pawn.KING)))) {
-                    enemyPieceTile.add(i * 9 + j);
-                }
-            }
-        }
-
-        List<Action> legalMoves = new ArrayList<>();
-        for(Piece piece : pieces) {
-            // prendo la posizione da dove parte il pezzo che sto considerando
-            String fromTile = convertToChessPosition(piece.row+1, piece.col+1);
-            try {
-                // Move up
-                for (int i = piece.row - 1; i >= 0; i--) {
-                    int pieceIndex = i * 9 + piece.col;
-                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
-                        // prendo la posizione dove finirà il pezzo che sto considerando
-                        String toTile = convertToChessPosition(i + 1, piece.col + 1);
-                        legalMoves.add(new Action(fromTile, toTile, turn));
-                    }else break;
-                }
-
-                // Move down
-                for (int i = piece.row + 1; i < 9; i++) {
-                    int pieceIndex = i * 9 + piece.col;
-                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
-                        String toTile = convertToChessPosition(i+1, piece.col+1);
-                        legalMoves.add(new Action(fromTile, toTile, turn));
-                    }else break;
-                }
-
-                // Move left
-                for (int j = piece.col - 1; j >= 0; j--) {
-                    int pieceIndex = piece.row * 9 + j;
-                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
-                        String toTile = convertToChessPosition(piece.row+1, j+1);
-                        legalMoves.add(new Action(fromTile, toTile, turn));
-                    }else break;
-                }
-
-                // Move right
-                for (int j = piece.col + 1; j < 9; j++) {
-                    int pieceIndex = piece.row * 9 + j;
-                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
-                        String toTile = convertToChessPosition(piece.row+1, j+1);
-                        legalMoves.add(new Action(fromTile, toTile, turn));
-                    }else break;
-                }
-            }catch (Exception e){
-                //e.printStackTrace();
-            }
-        }
-        return legalMoves;
-    }
+    }*/
 }

@@ -81,24 +81,6 @@ public abstract class State {
 	protected Pawn board[][];
 	protected Turn turn;
 
-	private Integer blackCaptures=0;
-	private Integer whitecaptures=0;
-	public Integer getBlackCaptures(){
-		return this.blackCaptures;
-	}
-
-	public void setBlackCaptures(Integer blackCaptures) {
-		this.blackCaptures = blackCaptures;
-	}
-
-	public Integer getWhitecaptures() {
-		return whitecaptures;
-	}
-
-	public void setWhitecaptures(Integer whitecaptures) {
-		this.whitecaptures = whitecaptures;
-	}
-
 	public State() {
 		super();
 	}

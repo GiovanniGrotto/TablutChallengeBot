@@ -788,29 +788,6 @@ public class GameAshtonTablut implements Game {
 				state = this.checkCaptureWhite(state, a, captures);
 			}
 
-			// if something has been captured, clear cache for draws
-			if (this.movesWithutCapturing == 0) {
-				this.drawConditions.clear();
-				this.loggGame.fine("Capture! Draw cache cleared!");
-			}
-
-			// controllo pareggio
-			int trovati = 0;
-			for (State s : drawConditions) {
-				if (s.equals(state)) {
-					trovati++;
-					if (trovati > repeated_moves_allowed) {
-						state.setTurn(State.Turn.DRAW);
-						break;
-					}
-				}
-			}
-
-			if (cache_size >= 0 && this.drawConditions.size() > cache_size) {
-				this.drawConditions.remove(0);
-			}
-			this.drawConditions.add(state.clone());
-
 			CustomState returnState = (CustomState) state;
             return returnState;
             //return (CustomState) originalState.getRules().checkMove(originalState.clone(), action);
