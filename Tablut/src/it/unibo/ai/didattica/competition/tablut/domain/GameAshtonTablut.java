@@ -812,17 +812,6 @@ public class GameAshtonTablut implements Game {
 			this.drawConditions.add(state.clone());
 
 			CustomState returnState = (CustomState) state;
-			//Ci sono state catture da parte del bianco
-			if(captures[0] > 0){
-				returnState.setWhitecaptures(state.getWhitecaptures() + captures[0]);
-			}
-			//Ci sono state catture da parte del nero
-			else if(captures[1] > 0){
-				returnState.setBlackCaptures(state.getBlackCaptures() + captures[1]);
-			}
-			if((returnState.getWhitecaptures() + returnState.getBlackCaptures()) > 1){
-				return returnState;
-			}
             return returnState;
             //return (CustomState) originalState.getRules().checkMove(originalState.clone(), action);
         }catch (Exception e){
