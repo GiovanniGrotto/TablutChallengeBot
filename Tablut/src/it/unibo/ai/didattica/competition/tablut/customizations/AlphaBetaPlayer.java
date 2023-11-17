@@ -81,16 +81,18 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
         }
         this.counter++;*/
         long start = System.currentTimeMillis();
-        double eval = evalCapture(state, player);
-        if(this.currDepthLimit == 1 && (eval==1.1 || eval == -1.1)){
-            if(eval == 1.1)
+        double captureEval = evalCapture(state, player);
+        if(this.currDepthLimit == 1 && (captureEval==1.1 || captureEval == -1.1)){
+            if(captureEval == 1.1)
                 this.captureStates.add(state.toString());
         }
         super.eval(state, player);
-        eval = this.game.getUtility(state, player);
+        double eval = this.game.getUtility(state, player);
         if(eval == Double.POSITIVE_INFINITY || eval == Double.NEGATIVE_INFINITY){
             this.foundWinLoss = true;
-        }
+        }/*else if(captureEval == -1.1){
+            return captureEval;
+        }*/
         this.evalTime += System.currentTimeMillis() - start;
         return eval;
     }
@@ -132,6 +134,7 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
             }
         }
 
+        if(this.foundWinLoss) System.out.println("Trovata vittoria/sconfitta");
         //Non ho trovato catture o ho trovato vittorie/sconfitte e allora eseguo la migliore mossa secondo l'albero
         System.out.println("Explored a total of " + getMetrics().get(METRICS_NODES_EXPANDED) + " nodes, reaching a depth limit of " + getMetrics().get(METRICS_MAX_DEPTH) + " in " + getTimeInSeconds(startTime) +" seconds");
         return a;

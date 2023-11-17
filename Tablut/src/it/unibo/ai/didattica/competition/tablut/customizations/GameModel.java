@@ -122,7 +122,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         }
         try {
             evaluation = CustomRandomForest.evaluate(state);
-            //if(turn == State.Turn.BLACK) evaluation = 1 - evaluation;
+            if(state.getTurn() == State.Turn.BLACK) evaluation = 1 - evaluation;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
