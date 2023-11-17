@@ -46,21 +46,10 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
     */
     public CustomState.Turn[] getPlayers() {
         try {
-            this.stateActionsMap.writeToJsonFile("stateAction.json");
+            //this.stateActionsMap.writeToJsonFile("stateAction.json");
             this.stateEvaluationMap.writeToJsonFile("stateEvaluation.json");
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-        if(this.stateActionsMap.size() > 50000){
-            System.out.println("##################################");
-            System.out.println("##################################");
-            System.out.println("FINITO LA TABELLA CONTROLLA");
-            System.out.println("##################################");
-            System.out.println("##################################");
-
-            while (true){
-
-            }
         }
         return new CustomState.Turn[]{CustomState.Turn.BLACK, CustomState.Turn.WHITE};
     }
