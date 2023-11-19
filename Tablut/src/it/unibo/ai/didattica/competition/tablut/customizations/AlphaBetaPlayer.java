@@ -109,8 +109,9 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
         else if(this.foundWin) System.out.println("Trovata vittoria");
         else if(this.foundLoss) System.out.println("Trovata sconfitta");
         //Non ho trovato catture o ho trovato vittorie/sconfitte e allora eseguo la migliore mossa secondo l'albero
-        System.out.println("Explored a total of " + getMetrics().get(METRICS_NODES_EXPANDED) + " nodes, reaching a depth limit of " + getMetrics().get(METRICS_MAX_DEPTH) + " in " + getTimeInSeconds(startTime) +" seconds");
+        this.game.getInitialState();
         System.out.println("Time to evaluate captures: "+this.evalCounter[0]+", time to evaluate utility: "+this.evalCounter[1]);
+        System.out.println("Explored a total of " + getMetrics().get(METRICS_NODES_EXPANDED) + " nodes, reaching a depth limit of " + getMetrics().get(METRICS_MAX_DEPTH) + " in " + getTimeInSeconds(startTime) +" seconds");
         System.out.println();
         this.evalTime = 0;
         this.evalCounter[0] = 0L;
@@ -120,22 +121,18 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
 
     @Override
     protected boolean hasSafeWinner(double resultUtility) {
-        /*if(resultUtility == Double.POSITIVE_INFINITY  || resultUtility==Double.POSITIVE_INFINITY-10){
-            System.out.println("Found safe winner with eval: "+resultUtility);
-            return true;
-        }*/
         return false;
     }
 
     @Override
     protected void incrementDepthLimit() {
         ++this.currDepthLimit;
-        //System.out.println("Depth "+this.currDepthLimit+", total time to evaluate states: "+this.evalTime);
-        //System.out.println("Time to evaluate captures: "+this.evalCounter[0]+", time to evaluate utility: "+this.evalCounter[1]);
+        /*System.out.println("Depth "+this.currDepthLimit+", total time to evaluate states: "+this.evalTime);
+        System.out.println("Time to evaluate captures: "+this.evalCounter[0]+", time to evaluate utility: "+this.evalCounter[1]);
         this.game.getInitialState();
         this.evalTime = 0;
         this.evalCounter[0] = 0L;
-        this.evalCounter[1] = 0L;
+        this.evalCounter[1] = 0L;*/
     }
 
     public long getTimeInSeconds(long startTime){

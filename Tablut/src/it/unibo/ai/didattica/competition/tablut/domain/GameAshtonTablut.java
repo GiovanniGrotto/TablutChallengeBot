@@ -268,12 +268,11 @@ public class GameAshtonTablut implements Game {
 		// se sono arrivato qui, muovo la pedina
 		state = this.movePawn(state, a);
 
-		int[] captures = {0, 0};
 		// a questo punto controllo lo stato per eventuali catture
 		if (state.getTurn().equalsTurn("W")) {
-			state = this.checkCaptureBlack(state, a, captures);
+			state = this.checkCaptureBlack(state, a);
 		} else if (state.getTurn().equalsTurn("B")) {
-			state = this.checkCaptureWhite(state, a, captures);
+			state = this.checkCaptureWhite(state, a);
 		}
 
 		// if something has been captured, clear cache for draws
@@ -325,7 +324,7 @@ public class GameAshtonTablut implements Game {
 		return state;
 	}
 
-	private State checkCaptureWhite(State state, Action a, int[] captures) {
+	private State checkCaptureWhite(State state, Action a) {
 		// controllo se mangio a destra
 		if (a.getColumnTo() < state.getBoard().length - 2
 				&& state.getPawn(a.getRowTo(), a.getColumnTo() + 1).equalsPawn("B")
@@ -394,10 +393,6 @@ public class GameAshtonTablut implements Game {
 		}
 		// TODO: implement the winning condition of the capture of the last
 		// black checker
-
-		if(this.movesWithutCapturing == -1){
-			captures[0]++;
-		}
 
 		this.movesWithutCapturing++;
 		return state;
@@ -679,7 +674,7 @@ public class GameAshtonTablut implements Game {
 		return state;
 	}
 
-	private State checkCaptureBlack(State state, Action a, int[] captures) {
+	private State checkCaptureBlack(State state, Action a) {
 
 		this.checkCaptureBlackPawnRight(state, a);
 		this.checkCaptureBlackPawnLeft(state, a);
@@ -689,10 +684,6 @@ public class GameAshtonTablut implements Game {
 		this.checkCaptureBlackKingLeft(state, a);
 		this.checkCaptureBlackKingDown(state, a);
 		this.checkCaptureBlackKingUp(state, a);
-
-		if(this.movesWithutCapturing == -1){
-			captures[1]++;
-		}
 
 		this.movesWithutCapturing++;
 		return state;
@@ -780,12 +771,11 @@ public class GameAshtonTablut implements Game {
                 state.setTurn(State.Turn.WHITE);
             }
 
-			int[] captures = {0, 0};
 			//controllo catture e vincita
 			if (state.getTurn().equalsTurn("W")) {
-			state = this.checkCaptureBlack(state, a, captures);
+				state = this.checkCaptureBlack(state, a);
 			} else if (state.getTurn().equalsTurn("B")) {
-				state = this.checkCaptureWhite(state, a, captures);
+				state = this.checkCaptureWhite(state, a);
 			}
 
 			CustomState returnState = (CustomState) state;

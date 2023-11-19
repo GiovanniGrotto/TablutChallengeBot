@@ -2,42 +2,58 @@ package it.unibo.ai.didattica.competition.tablut.customizations;
 
 import it.unibo.ai.didattica.competition.tablut.domain.Action;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
+import it.unibo.ai.didattica.competition.tablut.exceptions.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 public class GameModel implements aima.core.search.adversarial.Game<CustomState, Action, CustomState.Turn>{
 
     long generateActionsTime = 0;
+    long generateResultsTime = 0;
+    long randomForestTime = 0;
+    int evaluationMapHit = 0;
+    int evaluationMapFails = 0;
+
     final Double MAXVALUE = 100000.0;
 
     private final LimitedHashMap<String, Double> stateEvaluationMap; //= new LimitedHashMap<>(1000000);
     {
         try {
-            stateEvaluationMap = new LimitedHashMap<>(3000000, "stateEvaluation.json", "stateEvaluation");
+            stateEvaluationMap = new LimitedHashMap<>(2000000, System.getProperty("user.dir")+ File.separator + "stateEvaluation.json", "stateEvaluation");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private final LimitedHashMap<String, List<Action>> stateActionsMap; //= new LimitedHashMap<>(1000000);
+    private final LimitedHashMap<String, CustomState> actionResultMap = new LimitedHashMap<>(2000000);
+
+    /*private final LimitedHashMap<String, List<Action>> stateActionsMap; //= new LimitedHashMap<>(1000000);
     {
         try {
             stateActionsMap = new LimitedHashMap<>(2000000, "stateAction.json", "stateAction");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     @Override
     /*
         Funzione usata per stampare il tempo richiesto per generare le azioni e per valutare le posizioni non viene mai chiamata dall'albero.
     */
     public CustomState getInitialState() {
-        //System.out.println("Time to generate actions: "+this.generateActionsTime);
+        System.out.println("Time to generate actions: "+this.generateActionsTime);
+        System.out.println("Time to get results: "+this.generateResultsTime);
+        System.out.println("Eval map hitted: "+this.evaluationMapHit+" times, failed: "+this.evaluationMapFails+" times");
+        System.out.println("Time consumed by random forest: "+this.randomForestTime);
         //System.out.println("State evaluation map size: "+this.stateEvaluationMap.size()+", state actions map size:"+this.stateActionsMap.size());
         //System.out.println();
         this.generateActionsTime = 0;
+        this.generateResultsTime = 0;
+        this.evaluationMapFails = 0;
+        this.evaluationMapHit = 0;
+        this.randomForestTime = 0;
         return null;
     }
 
@@ -63,19 +79,30 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
     @Override
     public List<Action> getActions(CustomState state) {
         long start = System.currentTimeMillis();
-        List<Action> actions = this.stateActionsMap.get(state.toString());
-        if (actions != null && actions.size()!=0){
+        /*List<Action> actions = this.stateActionsMap.get(state.toString());
+        if (actions != null){
+            if(actions.size() == 0)
+                System.out.println("!!!!!!! 0 AZIONI TROVATE !!!!!!!" + state);
             return actions;
-        }
-        actions = getActionsBruteForceEarlyStop(state);
-        this.stateActionsMap.put(state.toString(), actions);
+        }*/
+        List<Action>actions = getActionsBruteForceEarlyStop(state);
+        //this.stateActionsMap.put(state.toString(), actions);
         this.generateActionsTime += System.currentTimeMillis() - start;
         return actions;
     }
 
     @Override
     public CustomState getResult(CustomState originalState, Action a) {
-        return originalState.getRules().makeMove(originalState.clone(), a);
+        long start = System.currentTimeMillis();
+        String stateAction = originalState.toString() + a.toString();
+        CustomState newState = this.actionResultMap.get(stateAction);
+        if (newState != null){
+            return newState;
+        }
+        newState = originalState.getRules().makeMove(originalState.clone(), a);
+        this.actionResultMap.put(stateAction, newState.clone());
+        this.generateResultsTime += System.currentTimeMillis() - start;
+        return newState;
     }
 
     @Override
@@ -108,8 +135,11 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
 
         Double evaluation = this.stateEvaluationMap.get(state.toString());
         if (evaluation != null){
+            this.evaluationMapHit++;
             return evaluation;
         }
+        this.evaluationMapFails++;
+        long start = System.currentTimeMillis();
         try {
             evaluation = CustomRandomForest.evaluate(state);
             if(state.getTurn() == State.Turn.BLACK) evaluation = 1 - evaluation;
@@ -117,6 +147,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
             throw new RuntimeException(e);
         }
         this.stateEvaluationMap.put(state.toString(), evaluation);
+        this.randomForestTime += System.currentTimeMillis() - start;
         return evaluation;
     }
 
@@ -220,86 +251,6 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
                         legalMoves.add(new Action(fromTile, toTile, turn));
                     }else break;
                 }
-            }catch (Exception e){
-                //e.printStackTrace();
-            }
-        }
-        /*List<Action> actuallyLegalMoves = this.getActionsBruteForce(state);
-        List<Action> differentMove = new ArrayList<>();
-        if(legalMoves.size() != actuallyLegalMoves.size()) {
-            for(Action trueMove : actuallyLegalMoves){
-                boolean flag = false;
-                for(Action legalMove : legalMoves){
-                    if(Objects.equals(legalMove.toString(), trueMove.toString())){
-                        flag = true;
-                    }
-                }
-                if(!flag)
-                    differentMove.add(trueMove);
-            }
-        }
-        if(differentMove.size()!=0)
-            System.out.println("TROVATE DIFFERENZE NELLE MOSSE");*/
-        return legalMoves;
-    }
-
-    public List<Action> getActionsBruteForce(CustomState state) {
-        State.Pawn[][] board = state.getBoard();
-        List<Piece> pieces = new ArrayList<>();
-        String turnString = state.getTurn().toString();
-
-        // Scorriamo la board e salviamo in pieces solo i pezzi del colore del turno attuale
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                String piece = board[i][j].toString();
-                if((Objects.equals(turnString, "W") && (Objects.equals(piece, "K") || Objects.equals(piece, "W"))) || (Objects.equals(turnString, "B") && Objects.equals(piece, "B"))){
-                    pieces.add(new Piece(turnString, i, j));
-                }
-            }
-        }
-
-        // calcolo le mosse che può fare ogni pezzo e genero altri pezzi lì
-        List<Action> allMoves = new ArrayList<>();
-        State.Turn turn = state.getTurn();
-        for(Piece piece : pieces) {
-            // prendo la posizione da dove parte il pezzo che sto considerando
-            String fromTile = convertToChessPosition(piece.row+1, piece.col+1);
-            try {
-                // Move up
-                for (int i = piece.row - 1; i >= 0; i--) {
-                    // prendo la posizione dove finirà il pezzo che sto considerando
-                    String toTile = convertToChessPosition(i+1, piece.col+1);
-                    allMoves.add(new Action(fromTile, toTile, turn));
-                }
-
-                // Move down
-                for (int i = piece.row + 1; i < 9; i++) {
-                    String toTile = convertToChessPosition(i+1, piece.col+1);
-                    allMoves.add(new Action(fromTile, toTile, turn));
-                }
-
-                // Move left
-                for (int j = piece.col - 1; j >= 0; j--) {
-                    String toTile = convertToChessPosition(piece.row+1, j+1);
-                    allMoves.add(new Action(fromTile, toTile, turn));
-                }
-
-                // Move right
-                for (int j = piece.col + 1; j < 9; j++) {
-                    String toTile = convertToChessPosition(piece.row+1, j+1);
-                    allMoves.add(new Action(fromTile, toTile, turn));
-                }
-            }catch (Exception e){
-                //e.printStackTrace();
-            }
-        }
-
-        //passo ogni azione per checkmove, se non ritorna eccezioni è legale e la aggiungo alla lista di mosse legali
-        List<Action> legalMoves = new ArrayList<>();
-        for(Action action: allMoves){
-            try{
-                state.getRules().checkMove(state.clone(), action);
-                legalMoves.add(action);
             }catch (Exception e){
                 //e.printStackTrace();
             }

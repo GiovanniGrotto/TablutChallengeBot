@@ -19,7 +19,7 @@ public class CustomRandomForest {
     static public RandomForest rf = new RandomForest();
     //static public Classifier randomForest = CustomRandomForest.importModel("/data/data/com.termux/files/home/storage/downloads/trainedModel.model");
     //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
-    static public Classifier randomForest = CustomRandomForest.importModel(System.getProperty("user.dir")+ File.separator + "trainedModel.model");
+    static public Classifier randomForest = CustomRandomForest.importModel(System.getProperty("user.dir")+ File.separator + "trainedModelx30.model");
     static public EvaluationUtils ev = new EvaluationUtils();
 
     static public Evaluation evaluation;
@@ -35,7 +35,7 @@ public class CustomRandomForest {
 
     static {
         try {
-            String filename=System.getProperty("user.dir")+ File.separator + "serialized_data.arff";
+            String filename=System.getProperty("user.dir")+ File.separator + "serialized_data_basic_label_x30.arff";
             System.out.println(filename);
             data = new DataSource(filename).getDataSet();
             data.setClassIndex(0);
@@ -47,7 +47,7 @@ public class CustomRandomForest {
 
     static {
         try {
-            String filename=System.getProperty("user.dir")+ File.separator + "serialized_data.arff";
+            String filename=System.getProperty("user.dir")+ File.separator + "serialized_data_basic_label_x30.arff";
             System.out.println(filename);
             data_no_label = new DataSource(filename).getDataSet();
             data_no_label.setClassIndex(0);
@@ -114,7 +114,7 @@ public class CustomRandomForest {
 
     public static void exportModel(Classifier trainedModel){
         try {
-            SerializationHelper.write("trainedModel.model", trainedModel);
+            SerializationHelper.write("trainedModelx20.model", trainedModel);
             System.out.println("Model saved successfully.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -151,7 +151,7 @@ public class CustomRandomForest {
         long startTime;
         long endTime;
         //Carico il dataset
-        DataSource source = new DataSource("Tablut/src/it/unibo/ai/didattica/competition/tablut/customizations/serialized_data.arff");
+        DataSource source = new DataSource("Tablut/src/it/unibo/ai/didattica/competition/tablut/customizations/serialized_data_basic_label_x30.arff");
         Instances data = source.getDataSet();
         //Setto quale attributo corrisponde alla label
         data.setClassIndex(0);
@@ -159,7 +159,7 @@ public class CustomRandomForest {
         data.randomize(new java.util.Random());
 
 
-//        //Divido in trainSet e testSet
+        //Divido in trainSet e testSet
         double splitPercentage=0.7;
         int trainSize = (int) Math.round(data.size()* splitPercentage );
         Instances testData= new Instances( data, 0, trainSize );
@@ -273,15 +273,10 @@ public class CustomRandomForest {
 
 
     public static void main(String[] argv) throws Exception {
-
         //tuneRandomForest();
-        //trainModel();
-        //crossValidation();
+        trainModel();
+        crossValidation();
         //quando abbiamo finito lo esportiamo
-        //exportModel(rf);
-
-
-        trainNN();
-
+        exportModel(rf);
     }
 }
