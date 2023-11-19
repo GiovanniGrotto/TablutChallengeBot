@@ -319,7 +319,7 @@ public class GameAshtonTablut implements Game {
 
 		this.loggGame.fine("Current draw cache size: " + this.drawConditions.size());
 
-		//this.loggGame.fine("Stato:\n" + state.toString());
+		this.loggGame.fine("Stato:\n" + state.toString());
 		System.out.println("Stato:\n" + state.toString());
 
 		return state;

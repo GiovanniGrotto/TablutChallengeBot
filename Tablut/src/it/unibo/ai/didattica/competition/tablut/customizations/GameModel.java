@@ -9,6 +9,7 @@ import java.util.*;
 public class GameModel implements aima.core.search.adversarial.Game<CustomState, Action, CustomState.Turn>{
 
     long generateActionsTime = 0;
+    final Double MAXVALUE = 100000.0;
 
     private final LimitedHashMap<String, Double> stateEvaluationMap; //= new LimitedHashMap<>(1000000);
     {
@@ -63,7 +64,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
     public List<Action> getActions(CustomState state) {
         long start = System.currentTimeMillis();
         List<Action> actions = this.stateActionsMap.get(state.toString());
-        if (actions != null){
+        if (actions != null && actions.size()!=0){
             return actions;
         }
         actions = getActionsBruteForceEarlyStop(state);
@@ -88,17 +89,17 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
             State.Turn winnerPlayer = state.getTurn();
             if (turn == State.Turn.WHITE) {
                 if (winnerPlayer.equals(State.Turn.WHITEWIN))
-                    return Double.POSITIVE_INFINITY-10;
+                    return MAXVALUE;
                 else if (winnerPlayer.equals(State.Turn.BLACKWIN)){
-                    return Double.NEGATIVE_INFINITY+10;
+                    return -MAXVALUE;
                 } else {
                     return 0;
                 }
             }else if (turn == State.Turn.BLACK) {
                 if (winnerPlayer.equals(State.Turn.WHITEWIN))
-                    return Double.NEGATIVE_INFINITY+10;
+                    return -MAXVALUE;
                 else if (winnerPlayer.equals(State.Turn.BLACKWIN)){
-                    return Double.POSITIVE_INFINITY-10;
+                    return MAXVALUE;
                 } else {
                     return 0;
                 }
@@ -127,6 +128,16 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         return columnChar + Integer.toString(row);
     }
 
+    public static int manhattanDistance(int piece1Index, int piece2Index) {
+        int size = 9;
+        int x1 = piece1Index % size;
+        int y1 = piece1Index / size;
+        int x2 = piece2Index % size;
+        int y2 = piece2Index / size;
+
+        return Math.abs(x2 - x1) + Math.abs(y2 - y1);
+    }
+
     // Nettamente più veloce delle altre
     public List<Action> getActionsBruteForceEarlyStop(CustomState state) {
         State.Pawn[][] board = state.getBoard();
@@ -153,13 +164,18 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
 
         List<Action> legalMoves = new ArrayList<>();
         for(Piece piece : pieces) {
+            int pieceIndexBeforeMove = piece.row * 9 + piece.col;
             // prendo la posizione da dove parte il pezzo che sto considerando
             String fromTile = convertToChessPosition(piece.row+1, piece.col+1);
             try {
                 // Move up
                 for (int i = piece.row - 1; i >= 0; i--) {
-                    int pieceIndex = i * 9 + piece.col;
-                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
+                    int pieceIndexAfterMove = i * 9 + piece.col;
+                    if(forbiddenTile.contains(pieceIndexBeforeMove) && forbiddenTile.contains(pieceIndexAfterMove) && manhattanDistance(pieceIndexBeforeMove, pieceIndexAfterMove) <= 2 && !enemyPieceTile.contains(pieceIndexAfterMove) && !playerPieceTile.contains(pieceIndexAfterMove)){
+                        String toTile = convertToChessPosition(i + 1, piece.col + 1);
+                        legalMoves.add(new Action(fromTile, toTile, turn));
+                    }
+                    else if(!forbiddenTile.contains(pieceIndexAfterMove) && !enemyPieceTile.contains(pieceIndexAfterMove) && !playerPieceTile.contains(pieceIndexAfterMove)) {
                         // prendo la posizione dove finirà il pezzo che sto considerando
                         String toTile = convertToChessPosition(i + 1, piece.col + 1);
                         legalMoves.add(new Action(fromTile, toTile, turn));
@@ -168,8 +184,12 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
 
                 // Move down
                 for (int i = piece.row + 1; i < 9; i++) {
-                    int pieceIndex = i * 9 + piece.col;
-                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
+                    int pieceIndexAfterMove = i * 9 + piece.col;
+                    if(forbiddenTile.contains(pieceIndexBeforeMove) && forbiddenTile.contains(pieceIndexAfterMove) && manhattanDistance(pieceIndexBeforeMove, pieceIndexAfterMove) <= 2 && !enemyPieceTile.contains(pieceIndexAfterMove) && !playerPieceTile.contains(pieceIndexAfterMove)){
+                        String toTile = convertToChessPosition(i+1, piece.col+1);
+                        legalMoves.add(new Action(fromTile, toTile, turn));
+                    }
+                    else if(!forbiddenTile.contains(pieceIndexAfterMove) && !enemyPieceTile.contains(pieceIndexAfterMove) && !playerPieceTile.contains(pieceIndexAfterMove)) {
                         String toTile = convertToChessPosition(i+1, piece.col+1);
                         legalMoves.add(new Action(fromTile, toTile, turn));
                     }else break;
@@ -177,8 +197,12 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
 
                 // Move left
                 for (int j = piece.col - 1; j >= 0; j--) {
-                    int pieceIndex = piece.row * 9 + j;
-                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
+                    int pieceIndexAfterMove = piece.row * 9 + j;
+                    if(forbiddenTile.contains(pieceIndexBeforeMove) && forbiddenTile.contains(pieceIndexAfterMove) && manhattanDistance(pieceIndexBeforeMove, pieceIndexAfterMove) <= 2 && !enemyPieceTile.contains(pieceIndexAfterMove) && !playerPieceTile.contains(pieceIndexAfterMove)){
+                        String toTile = convertToChessPosition(piece.row+1, j+1);
+                        legalMoves.add(new Action(fromTile, toTile, turn));
+                    }
+                    else if(!forbiddenTile.contains(pieceIndexAfterMove) && !enemyPieceTile.contains(pieceIndexAfterMove) && !playerPieceTile.contains(pieceIndexAfterMove)) {
                         String toTile = convertToChessPosition(piece.row+1, j+1);
                         legalMoves.add(new Action(fromTile, toTile, turn));
                     }else break;
@@ -186,12 +210,96 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
 
                 // Move right
                 for (int j = piece.col + 1; j < 9; j++) {
-                    int pieceIndex = piece.row * 9 + j;
-                    if(!forbiddenTile.contains(pieceIndex) && !enemyPieceTile.contains(pieceIndex) && !playerPieceTile.contains(pieceIndex)) {
+                    int pieceIndexAfterMove = piece.row * 9 + j;
+                    if(forbiddenTile.contains(pieceIndexBeforeMove) && forbiddenTile.contains(pieceIndexAfterMove) && manhattanDistance(pieceIndexBeforeMove, pieceIndexAfterMove) <= 2 && !enemyPieceTile.contains(pieceIndexAfterMove) && !playerPieceTile.contains(pieceIndexAfterMove)){
+                        String toTile = convertToChessPosition(piece.row+1, j+1);
+                        legalMoves.add(new Action(fromTile, toTile, turn));
+                    }
+                    else if(!forbiddenTile.contains(pieceIndexAfterMove) && !enemyPieceTile.contains(pieceIndexAfterMove) && !playerPieceTile.contains(pieceIndexAfterMove)) {
                         String toTile = convertToChessPosition(piece.row+1, j+1);
                         legalMoves.add(new Action(fromTile, toTile, turn));
                     }else break;
                 }
+            }catch (Exception e){
+                //e.printStackTrace();
+            }
+        }
+        /*List<Action> actuallyLegalMoves = this.getActionsBruteForce(state);
+        List<Action> differentMove = new ArrayList<>();
+        if(legalMoves.size() != actuallyLegalMoves.size()) {
+            for(Action trueMove : actuallyLegalMoves){
+                boolean flag = false;
+                for(Action legalMove : legalMoves){
+                    if(Objects.equals(legalMove.toString(), trueMove.toString())){
+                        flag = true;
+                    }
+                }
+                if(!flag)
+                    differentMove.add(trueMove);
+            }
+        }
+        if(differentMove.size()!=0)
+            System.out.println("TROVATE DIFFERENZE NELLE MOSSE");*/
+        return legalMoves;
+    }
+
+    public List<Action> getActionsBruteForce(CustomState state) {
+        State.Pawn[][] board = state.getBoard();
+        List<Piece> pieces = new ArrayList<>();
+        String turnString = state.getTurn().toString();
+
+        // Scorriamo la board e salviamo in pieces solo i pezzi del colore del turno attuale
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board.length; j++) {
+                String piece = board[i][j].toString();
+                if((Objects.equals(turnString, "W") && (Objects.equals(piece, "K") || Objects.equals(piece, "W"))) || (Objects.equals(turnString, "B") && Objects.equals(piece, "B"))){
+                    pieces.add(new Piece(turnString, i, j));
+                }
+            }
+        }
+
+        // calcolo le mosse che può fare ogni pezzo e genero altri pezzi lì
+        List<Action> allMoves = new ArrayList<>();
+        State.Turn turn = state.getTurn();
+        for(Piece piece : pieces) {
+            // prendo la posizione da dove parte il pezzo che sto considerando
+            String fromTile = convertToChessPosition(piece.row+1, piece.col+1);
+            try {
+                // Move up
+                for (int i = piece.row - 1; i >= 0; i--) {
+                    // prendo la posizione dove finirà il pezzo che sto considerando
+                    String toTile = convertToChessPosition(i+1, piece.col+1);
+                    allMoves.add(new Action(fromTile, toTile, turn));
+                }
+
+                // Move down
+                for (int i = piece.row + 1; i < 9; i++) {
+                    String toTile = convertToChessPosition(i+1, piece.col+1);
+                    allMoves.add(new Action(fromTile, toTile, turn));
+                }
+
+                // Move left
+                for (int j = piece.col - 1; j >= 0; j--) {
+                    String toTile = convertToChessPosition(piece.row+1, j+1);
+                    allMoves.add(new Action(fromTile, toTile, turn));
+                }
+
+                // Move right
+                for (int j = piece.col + 1; j < 9; j++) {
+                    String toTile = convertToChessPosition(piece.row+1, j+1);
+                    allMoves.add(new Action(fromTile, toTile, turn));
+                }
+            }catch (Exception e){
+                //e.printStackTrace();
+            }
+        }
+
+        //passo ogni azione per checkmove, se non ritorna eccezioni è legale e la aggiungo alla lista di mosse legali
+        List<Action> legalMoves = new ArrayList<>();
+        for(Action action: allMoves){
+            try{
+                state.getRules().checkMove(state.clone(), action);
+                legalMoves.add(action);
             }catch (Exception e){
                 //e.printStackTrace();
             }

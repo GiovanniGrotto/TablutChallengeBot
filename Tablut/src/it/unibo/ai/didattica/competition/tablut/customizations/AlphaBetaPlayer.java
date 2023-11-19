@@ -17,6 +17,7 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
     Boolean foundWin = false;
     Boolean foundLoss = false;
 
+    final Double MAXVALUE = 100000.0;
 
     public AlphaBetaPlayer(Game<CustomState, Action, CustomState.Turn> game , double utilMin, double utilMax, int time) {
         super(game, utilMin, utilMax, time);
@@ -41,6 +42,12 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
 
         int whitePieceDifference = whitePieces-startWhitePieces;
         int blackPieceDifference = blackPieces-startBlackPieces;
+        /*if(whitePieceDifference <-1)
+            System.out.print("");
+        if(blackPieceDifference<-1)
+            System.out.print("");
+        if(whitePieceDifference<-1 && blackPieceDifference<-1 && whitePieceDifference!=blackPieceDifference)
+            System.out.print("");*/
         if(state.getTurn() == State.Turn.WHITE){
             if(whitePieceDifference < blackPieceDifference)
                 return (double) (whitePieceDifference - blackPieceDifference) /this.currDepthLimit;
@@ -64,13 +71,37 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
         long start = System.currentTimeMillis();
         double captureEval = evalCapture(state, player);
         super.eval(state, player);
-        double eval = this.game.getUtility(state, player) + captureEval;
-        if(eval <= Double.NEGATIVE_INFINITY+10 || eval >= Double.POSITIVE_INFINITY-10){
+        double eval = this.game.getUtility(state, player);
+        /*if((eval == -MAXVALUE || eval == MAXVALUE) && captureEval!=0)
+            System.out.print("");*/
+        //eval += captureEval;
+        if(eval <= -MAXVALUE+10){
             this.foundLoss = true;
+        }
+        if(eval >= MAXVALUE-10){
             this.foundWin = true;
         }
         this.evalTime += System.currentTimeMillis() - start;
         return eval;
+    }
+
+    public void mctsTest(CustomState state){
+        long startTime = System.currentTimeMillis();
+        long endTime = startTime + 60000;  // 60 seconds in milliseconds
+        int gamePlayed = 0;
+        Random rand = new Random();
+
+        while (System.currentTimeMillis() < endTime) {
+            gamePlayed++;
+            CustomState tmpState = state.clone();
+            while (tmpState.getTurn()!= State.Turn.WHITEWIN && tmpState.getTurn()!= State.Turn.BLACKWIN){
+                if(this.game.getActions(tmpState).size() == 0)
+                    System.out.println("TROVATE 0 MOSSE");
+                List<Action> actions = this.game.getActions(tmpState);
+                tmpState = this.game.getResult(tmpState.clone(), actions.get(rand.nextInt(actions.size())));
+            }
+        }
+        System.out.println("Partite simulate: "+gamePlayed);
     }
 
     @Override
@@ -104,10 +135,10 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
 
     @Override
     protected boolean hasSafeWinner(double resultUtility) {
-        if(resultUtility == Double.POSITIVE_INFINITY  || resultUtility==Double.POSITIVE_INFINITY-10){
+        /*if(resultUtility == Double.POSITIVE_INFINITY  || resultUtility==Double.POSITIVE_INFINITY-10){
             System.out.println("Found safe winner with eval: "+resultUtility);
             return true;
-        }
+        }*/
         return false;
     }
 
