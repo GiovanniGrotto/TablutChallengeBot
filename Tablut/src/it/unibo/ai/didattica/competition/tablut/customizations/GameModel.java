@@ -34,9 +34,9 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         Funzione usata per stampare il tempo richiesto per generare le azioni e per valutare le posizioni non viene mai chiamata dall'albero.
     */
     public CustomState getInitialState() {
-        //System.out.println("Time to generate actions: "+this.generateActionsTime);
-        //System.out.println("State evaluation map size: "+this.stateEvaluationMap.size()+", state actions map size:"+this.stateActionsMap.size());
-        //System.out.println();
+        System.out.println("Time to generate actions: "+this.generateActionsTime);
+        System.out.println("State evaluation map size: "+this.stateEvaluationMap.size()+", state actions map size:"+this.stateActionsMap.size());
+        System.out.println();
         this.generateActionsTime = 0;
         return null;
     }

@@ -24,7 +24,7 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
     }
 
     //Preso uno stato in input determina se sono avvenute catture rispetto allo stato root
-    public double evalCapture(CustomState state, State.Turn player){
+    public double evalCapture(CustomState state){
         int whitePieces = 0;
         int blackPieces = 0;
 
@@ -40,14 +40,8 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
             }
         }
 
-        int whitePieceDifference = whitePieces-startWhitePieces;
-        int blackPieceDifference = blackPieces-startBlackPieces;
-        /*if(whitePieceDifference <-1)
-            System.out.print("");
-        if(blackPieceDifference<-1)
-            System.out.print("");
-        if(whitePieceDifference<-1 && blackPieceDifference<-1 && whitePieceDifference!=blackPieceDifference)
-            System.out.print("");*/
+        int whitePieceDifference = whitePieces - startWhitePieces;
+        int blackPieceDifference = blackPieces - startBlackPieces;
         if(state.getTurn() == State.Turn.WHITE){
             if(whitePieceDifference < blackPieceDifference)
                 return (double) (whitePieceDifference - blackPieceDifference) /this.currDepthLimit;
@@ -66,15 +60,13 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
     public double eval(CustomState state, State.Turn player) {
         /*if(this.counter%100000==0){ // ogni 100000 evaluation sovrascrive la hashmap local con quella aggiornata
             this.game.getPlayers();
-        }*/
-        this.counter++;
+        }
+        this.counter++;*/
         long start = System.currentTimeMillis();
-        double captureEval = evalCapture(state, player);
+        double captureEval = evalCapture(state);
         super.eval(state, player);
         double eval = this.game.getUtility(state, player);
-        /*if((eval == -MAXVALUE || eval == MAXVALUE) && captureEval!=0)
-            System.out.print("");*/
-        //eval += captureEval;
+        eval += captureEval;
         if(eval <= -MAXVALUE+10){
             this.foundLoss = true;
         }
@@ -85,24 +77,6 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
         return eval;
     }
 
-    public void mctsTest(CustomState state){
-        long startTime = System.currentTimeMillis();
-        long endTime = startTime + 60000;  // 60 seconds in milliseconds
-        int gamePlayed = 0;
-        Random rand = new Random();
-
-        while (System.currentTimeMillis() < endTime) {
-            gamePlayed++;
-            CustomState tmpState = state.clone();
-            while (tmpState.getTurn()!= State.Turn.WHITEWIN && tmpState.getTurn()!= State.Turn.BLACKWIN){
-                if(this.game.getActions(tmpState).size() == 0)
-                    System.out.println("TROVATE 0 MOSSE");
-                List<Action> actions = this.game.getActions(tmpState);
-                tmpState = this.game.getResult(tmpState.clone(), actions.get(rand.nextInt(actions.size())));
-            }
-        }
-        System.out.println("Partite simulate: "+gamePlayed);
-    }
 
     @Override
     public Action makeDecision(CustomState state) {
@@ -126,8 +100,9 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
         //L'albero inizia la computazione
         Action a = super.makeDecision(state);
 
-        if(this.foundWin) System.out.println("Trovata vittoria");
-        if(this.foundLoss) System.out.println("Trovata sconfitta");
+        if(this.foundWin && this.foundLoss) System.out.println("Trovata vittoria e sconfitta");
+        else if(this.foundWin) System.out.println("Trovata vittoria");
+        else if(this.foundLoss) System.out.println("Trovata sconfitta");
         //Non ho trovato catture o ho trovato vittorie/sconfitte e allora eseguo la migliore mossa secondo l'albero
         System.out.println("Explored a total of " + getMetrics().get(METRICS_NODES_EXPANDED) + " nodes, reaching a depth limit of " + getMetrics().get(METRICS_MAX_DEPTH) + " in " + getTimeInSeconds(startTime) +" seconds");
         return a;
@@ -145,7 +120,7 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
     @Override
     protected void incrementDepthLimit() {
         ++this.currDepthLimit;
-        //System.out.println("Depth "+this.currDepthLimit+", time to evaluate states: "+this.evalTime);
+        System.out.println("Depth "+this.currDepthLimit+", time to evaluate states: "+this.evalTime);
         this.game.getInitialState();
         this.evalTime = 0;
     }
