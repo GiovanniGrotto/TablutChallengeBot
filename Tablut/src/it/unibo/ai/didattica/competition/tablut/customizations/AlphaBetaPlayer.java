@@ -84,8 +84,8 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
 
     @Override
     public Action makeDecision(CustomState state) {
-        return this.game.getActions(state).get(0);
-        /*long startTime = System.currentTimeMillis();
+        this.game.getPlayers();
+        long startTime = System.currentTimeMillis();
         this.startWhitePieces = 0;
         this.startBlackPieces = 0;
 
@@ -116,7 +116,7 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
         this.evalTime = 0;
         this.evalCounter[0] = 0L;
         this.evalCounter[1] = 0L;
-        return a;*/
+        return a;
     }
 
     @Override

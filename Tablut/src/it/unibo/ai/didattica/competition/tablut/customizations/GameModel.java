@@ -25,6 +25,8 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
             throw new RuntimeException(e);
         }
     }
+    private final LimitedHashMap<String, CustomState> actionResultMap = new LimitedHashMap<>(500000);
+
 
     @Override
     /*
@@ -45,135 +47,18 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         return null;
     }
 
-    private static String findKeyWithHighestValue(HashMap<String, int[]> map) {
-        String keyWithHighestValue = null;
-        double maxValue = Double.MIN_VALUE;
-
-        for (Map.Entry<String, int[]> entry : map.entrySet()) {
-            int[] value = entry.getValue();
-            double val = (double) value[1] /(value[0]+1);
-            if (val > maxValue) {
-                maxValue = val;
-                keyWithHighestValue = entry.getKey();
-            }
-        }
-
-        return keyWithHighestValue;
-    }
-
-    private static final double C = 1; // Tweak this constant for your needs
-
-    public static String selectAction(Map<String, int[]> actionMap, int totalSimulations) {
-        String selectedAction = null;
-        double maxUCB = -1000000;
-
-        for (Map.Entry<String, int[]> entry : actionMap.entrySet()) {
-            String action = entry.getKey();
-            int[] values = entry.getValue();
-
-            double exploitation = values[0] / (values[1]+1); // Total reward / Number of simulations
-            double exploration = C * Math.sqrt(Math.log(totalSimulations) / values[1]);
-            if (Double.isNaN(exploration))
-                exploration = 0;
-            double ucb = exploitation + exploration;
-
-            if (ucb > maxUCB) {
-                maxUCB = ucb;
-                selectedAction = action;
-            }
-        }
-
-        return selectedAction;
-    }
-
-    public Action mcts(CustomState state){
-        long startTime = System.currentTimeMillis();
-        long endTime = startTime + 58000;  // 60 seconds in milliseconds
-        int simulatedGames = 0;
-        int failedGames = 0;
-        int maxTurn = 0;
-        int minTurn = 1000000;
-        State.Turn initialTurn = state.getTurn();
-        HashMap<String, int[]> actionWins = new HashMap<String, int[]>();
-
-        List<Action> actions = this.getActionsBruteForceEarlyStop(state);
-        for(Action a : actions)
-            actionWins.putIfAbsent(a.toString(), new int[]{0, 0});
-
-        while (System.currentTimeMillis() < endTime) {
-            CustomState cloneState = state.clone();
-            List<Action> tmpActions = new ArrayList<>();
-            int numTurns = 0;
-            while(cloneState.getTurn() != State.Turn.WHITEWIN && cloneState.getTurn() != State.Turn.BLACKWIN){
-                actions = this.getActionsBruteForceEarlyStop(cloneState);
-                if (actions == null || actions.isEmpty()) {
-                    failedGames++;
-                    break;
-                }
-                Action action = null;
-                if(numTurns==0) {
-                    String actionString = selectAction(actionWins, simulatedGames);
-                    String[] result = actionString.split(" ");
-                    String fromSquare = result[4];
-                    String toSquare = result[6];
-                    try {
-                        action = new Action(fromSquare, toSquare, initialTurn);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }else{
-                    Random rand = new Random();
-                    int randomIndex = rand.nextInt(actions.size());
-                    action = actions.get(randomIndex);
-                }
-                tmpActions.add(action);
-                cloneState = getResult(cloneState.clone(), action);
-                numTurns++;
-            }
-            maxTurn = Math.max(maxTurn, numTurns);
-            minTurn = Math.min(minTurn, numTurns);
-            simulatedGames++;
-            Action a = tmpActions.get(0);
-            int[] updatedValue = actionWins.get(a.toString());
-            updatedValue[0]++;
-            if(initialTurn == State.Turn.WHITE && cloneState.getTurn() == State.Turn.WHITEWIN){
-                if (actionWins.containsKey(a.toString())) {
-                    updatedValue[1]++;
-                    actionWins.put(a.toString(), updatedValue);
-                }
-            }else if(initialTurn == State.Turn.BLACK && cloneState.getTurn() == State.Turn.BLACKWIN){
-                if (actionWins.containsKey(a.toString())) {
-                    updatedValue[1]++;
-                    actionWins.put(a.toString(), updatedValue);
-                }
-            }
-        }
-
-        String bestMove = findKeyWithHighestValue(actionWins);
-        String[] result = bestMove.split(" ");
-        String fromSquare = result[4];
-        String toSquare = result[6];
-        try {
-            System.out.println("Partite simulate: "+simulatedGames+", failed: "+failedGames);
-            Action bestAction = new Action(fromSquare, toSquare, initialTurn);
-            return bestAction;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        //System.out.println("Longest turn: "+maxTurn+", shortest turn: "+minTurn);
-    }
-
     @Override
     /*
         Funzione usata per scrivere la HashMap degli stati-figli non viene mai chiamata dall'albero.
     */
     public CustomState.Turn[] getPlayers() {
-        try {
+        actionResultMap.clear();
+        /*try {
             //this.stateActionsMap.writeToJsonFile("stateAction.json");
             this.stateEvaluationMap.writeToJsonFile("stateEvaluation.json");
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }*/
         return new CustomState.Turn[]{CustomState.Turn.BLACK, CustomState.Turn.WHITE};
     }
 
@@ -184,22 +69,28 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
 
     @Override
     public List<Action> getActions(CustomState state) {
-        Action a = this.mcts(state);
-        List<Action> actionList = new ArrayList<>();
-        actionList.add(a);
-        return actionList;
-        /*long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         List<Action>actions = getActionsBruteForceEarlyStop(state);
         this.generateActionsTime += System.currentTimeMillis() - start;
-        return actions;*/
+        return actions;
     }
 
     @Override
     public CustomState getResult(CustomState originalState, Action a) {
         long start = System.currentTimeMillis();
-        CustomState newState = originalState.getRules().makeMove(originalState.clone(), a);
+        String stateAction = originalState.toString() + a.toString();
+        CustomState newState = this.actionResultMap.get(stateAction);
+        if (newState != null){
+            return newState;
+        }
+        newState = originalState.getRules().makeMove(originalState.clone(), a);
+        this.actionResultMap.put(stateAction, newState.clone());
         this.generateResultsTime += System.currentTimeMillis() - start;
         return newState;
+        /*long start = System.currentTimeMillis();
+        CustomState newState = originalState.getRules().makeMove(originalState.clone(), a);
+        this.generateResultsTime += System.currentTimeMillis() - start;
+        return newState;*/
     }
 
     @Override
