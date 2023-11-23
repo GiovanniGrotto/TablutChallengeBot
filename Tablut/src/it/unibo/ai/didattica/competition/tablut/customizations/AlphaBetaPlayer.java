@@ -99,14 +99,14 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
         //L'albero inizia la computazione
         Action a = super.makeDecision(state);
 
-        if(this.foundWin && this.foundLoss) System.out.println("Trovata vittoria e sconfitta");
-        else if(this.foundWin) System.out.println("Trovata vittoria");
-        else if(this.foundLoss) System.out.println("Trovata sconfitta");
+        //if(this.foundWin && this.foundLoss) System.out.println("Trovata vittoria e sconfitta");
+        //else if(this.foundWin) System.out.println("Trovata vittoria");
+        //else if(this.foundLoss) System.out.println("Trovata sconfitta");
         //Non ho trovato catture o ho trovato vittorie/sconfitte e allora eseguo la migliore mossa secondo l'albero
         this.game.getInitialState();
-        System.out.println("Time to evaluate captures: "+this.evalCounter[0]+", time to evaluate utility: "+this.evalCounter[1]);
+        //System.out.println("Time to evaluate captures: "+this.evalCounter[0]+", time to evaluate utility: "+this.evalCounter[1]);
         System.out.println("Explored a total of " + getMetrics().get(METRICS_NODES_EXPANDED) + " nodes, reaching a depth limit of " + getMetrics().get(METRICS_MAX_DEPTH) + " in " + getTimeInSeconds(startTime) +" seconds");
-        System.out.println();
+        //System.out.println();
         this.evalTime = 0;
         this.evalCounter[0] = 0L;
         this.evalCounter[1] = 0L;

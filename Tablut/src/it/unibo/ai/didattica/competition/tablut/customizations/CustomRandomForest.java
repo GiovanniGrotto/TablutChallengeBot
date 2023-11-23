@@ -31,13 +31,13 @@ public class CustomRandomForest {
     static {
         //System.out.println(System.getProperty("user.dir"));
         //System.out.println(System.getProperty("user.home"));
-        System.out.println(System.getProperty("user.dir")+ File.separator + "trainedModel.model");
+        //System.out.println(System.getProperty("user.dir")+ File.separator + "trainedModel.model");
     }
 
     static {
         try {
             String filename=System.getProperty("user.dir")+ File.separator + "serialized_data.arff";
-            System.out.println(filename);
+            //System.out.println(filename);
             data = new DataSource(filename).getDataSet();
             data.setClassIndex(0);
             //System.out.println(System.getProperty("user.dir"));
@@ -49,7 +49,7 @@ public class CustomRandomForest {
     static {
         try {
             String filename=System.getProperty("user.dir")+ File.separator + "serialized_data.arff";
-            System.out.println(filename);
+            //System.out.println(filename);
             data_no_label = new DataSource(filename).getDataSet();
             data_no_label.setClassIndex(0);
             //System.out.println(System.getProperty("user.dir"));
@@ -116,7 +116,7 @@ public class CustomRandomForest {
     public static void exportModel(Classifier trainedModel){
         try {
             SerializationHelper.write("trainedModel.model", trainedModel);
-            System.out.println("Model saved successfully.");
+            //System.out.println("Model saved successfully.");
         } catch (Exception e) {
             e.printStackTrace();
         }
