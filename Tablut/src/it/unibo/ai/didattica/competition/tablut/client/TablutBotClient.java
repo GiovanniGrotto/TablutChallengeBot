@@ -53,9 +53,9 @@ public class TablutBotClient extends TablutClient{
         try {
             this.declareName();
         } catch (Exception e) {
-            ////e.printStackTrace();
+            //e.printStackTrace();
         }
-        //System.out.println("Running...");
+        System.out.println("Running...");
 
         while (true){
             try {
@@ -74,7 +74,7 @@ public class TablutBotClient extends TablutClient{
                 try {
                     this.write(bestAction);
                 } catch (ClassNotFoundException | IOException e) {
-                    ////e.printStackTrace();
+                    //e.printStackTrace();
                 }
             }
         }

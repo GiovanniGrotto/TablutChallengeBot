@@ -1,6 +1,6 @@
 import pandas as pd
 from extract_df import write_csv
-
+import time
 
 def serialize_state(state):
     new_state = []
@@ -56,10 +56,15 @@ def discount_basic_label(row):
 
 def serialize_data(df, label_type):
     new_df = []
-
     for row in df.iterrows():
+        if row[0]%50000==0:
+            print(row[0])
+        row[1]['state'] = row[1]['index'][:-1].replace("\n","").replace("-","")
+        row[1]['turn'] = row[1]['index'][-1]
+        row[1]['result'] = row[1][0]
         new_state = serialize_state(row[1]['state'])
         new_state += [0] if row[1]['turn'] == "W" else [1]
+        result = row[1]['result']
         if label_type == "basic_label":
             result = basic_label(row)
         elif label_type == "each_turn_label":
@@ -75,13 +80,18 @@ def read_csv(csv_file):
     return df
 
 
-LABEL_TYPE = "basic_label" #basic_label, each_turn_label, discounted_label
+LABEL_TYPE = "fromStateEvalMap1mln" #basic_label, each_turn_label, discounted_label
 # La prima colonna è il risultato, e l'ultima il turno
 def main():
-    df = read_csv("C:\\Users\\giova\\OneDrive\\Desktop\\TablutChallengeBot\\python materials\\raw_data.csv")
+    start = time.time()
+    df = pd.read_json("C:\\Users\\giova\\OneDrive\\Desktop\\stateEvaluation.json", typ='series').reset_index()
+    df = read_csv("C:\\Users\\giova\\OneDrive\\Desktop\\TablutChallengeBot\\python materials\\serialized_data_fromStateEvalMap.csv")
     #serialize_df = read_csv(f"C:\\Users\\giova\\OneDrive\\Desktop\\TablutChallengeBot\\python materials\\serialized_data_{LABEL_TYPE}.csv")
+    df = df[:1000000]
     serialize_df = serialize_data(df, LABEL_TYPE)
+    print("Writing the df")
     serialize_df.to_csv(f'serialized_data_{LABEL_TYPE}.csv', index=False)
+    print(f"Time needed: {time.time()-start}")
 
 
 if __name__ == "__main__":

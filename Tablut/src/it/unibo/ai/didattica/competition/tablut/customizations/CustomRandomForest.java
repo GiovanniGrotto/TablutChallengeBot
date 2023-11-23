@@ -29,8 +29,9 @@ public class CustomRandomForest {
     static public Instances data;
 
     static {
-        System.out.println(System.getProperty("user.dir"));
-        System.out.println(System.getProperty("user.home"));
+        //System.out.println(System.getProperty("user.dir"));
+        //System.out.println(System.getProperty("user.home"));
+        System.out.println(System.getProperty("user.dir")+ File.separator + "trainedModel.model");
     }
 
     static {
@@ -39,7 +40,7 @@ public class CustomRandomForest {
             System.out.println(filename);
             data = new DataSource(filename).getDataSet();
             data.setClassIndex(0);
-            System.out.println(System.getProperty("user.dir"));
+            //System.out.println(System.getProperty("user.dir"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -51,7 +52,7 @@ public class CustomRandomForest {
             System.out.println(filename);
             data_no_label = new DataSource(filename).getDataSet();
             data_no_label.setClassIndex(0);
-            System.out.println(System.getProperty("user.dir"));
+            //System.out.println(System.getProperty("user.dir"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -114,7 +115,7 @@ public class CustomRandomForest {
 
     public static void exportModel(Classifier trainedModel){
         try {
-            SerializationHelper.write("trainedModelx10.model", trainedModel);
+            SerializationHelper.write("trainedModel.model", trainedModel);
             System.out.println("Model saved successfully.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -274,9 +275,9 @@ public class CustomRandomForest {
 
     public static void main(String[] argv) throws Exception {
         //tuneRandomForest();
-        trainModel();
-        crossValidation();
+        //trainModel();
+        //crossValidation();
         //quando abbiamo finito lo esportiamo
-        exportModel(rf);
+        //exportModel(rf);
     }
 }

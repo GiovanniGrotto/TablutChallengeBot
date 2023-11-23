@@ -72,7 +72,7 @@ public class GameAshtonTablut implements Game {
 			fh = null;
 			fh = new FileHandler(gameLogName, true);
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 			System.exit(1);
 		}
 		this.loggGame = Logger.getLogger("GameLog");

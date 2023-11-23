@@ -17,7 +17,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
 
     final Double MAXVALUE = 100000.0;
 
-    private final LimitedHashMap<String, Double> stateEvaluationMap; //= new LimitedHashMap<>(1000000);
+    private final LimitedHashMap<String, Double> stateEvaluationMap;
     {
         try {
             stateEvaluationMap = new LimitedHashMap<>(2000000, System.getProperty("user.dir")+ File.separator + "stateEvaluation.json", "stateEvaluation");
@@ -25,7 +25,6 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
             throw new RuntimeException(e);
         }
     }
-    private final LimitedHashMap<String, CustomState> actionResultMap = new LimitedHashMap<>(500000);
 
 
     @Override
@@ -33,12 +32,10 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         Funzione usata per stampare il tempo richiesto per generare le azioni e per valutare le posizioni non viene mai chiamata dall'albero.
     */
     public CustomState getInitialState() {
-        System.out.println("Time to generate actions: "+this.generateActionsTime);
-        System.out.println("Time to get results: "+this.generateResultsTime);
-        System.out.println("Eval map hitted: "+this.evaluationMapHit+" times, failed: "+this.evaluationMapFails+" times");
-        System.out.println("Time consumed by random forest: "+this.randomForestTime);
-        //System.out.println("State evaluation map size: "+this.stateEvaluationMap.size()+", state actions map size:"+this.stateActionsMap.size());
-        //System.out.println();
+        //System.out.println("Time to generate actions: "+this.generateActionsTime);
+        //System.out.println("Time to get results: "+this.generateResultsTime);
+        //System.out.println("Eval map hitted: "+this.evaluationMapHit+" times, failed: "+this.evaluationMapFails+" times");
+        //System.out.println("Time consumed by random forest: "+this.randomForestTime);
         this.generateActionsTime = 0;
         this.generateResultsTime = 0;
         this.evaluationMapFails = 0;
@@ -52,13 +49,6 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
         Funzione usata per scrivere la HashMap degli stati-figli non viene mai chiamata dall'albero.
     */
     public CustomState.Turn[] getPlayers() {
-        actionResultMap.clear();
-        /*try {
-            //this.stateActionsMap.writeToJsonFile("stateAction.json");
-            this.stateEvaluationMap.writeToJsonFile("stateEvaluation.json");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }*/
         return new CustomState.Turn[]{CustomState.Turn.BLACK, CustomState.Turn.WHITE};
     }
 
@@ -78,19 +68,9 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
     @Override
     public CustomState getResult(CustomState originalState, Action a) {
         long start = System.currentTimeMillis();
-        String stateAction = originalState.toString() + a.toString();
-        CustomState newState = this.actionResultMap.get(stateAction);
-        if (newState != null){
-            return newState;
-        }
-        newState = originalState.getRules().makeMove(originalState.clone(), a);
-        this.actionResultMap.put(stateAction, newState.clone());
-        this.generateResultsTime += System.currentTimeMillis() - start;
-        return newState;
-        /*long start = System.currentTimeMillis();
         CustomState newState = originalState.getRules().makeMove(originalState.clone(), a);
         this.generateResultsTime += System.currentTimeMillis() - start;
-        return newState;*/
+        return newState;
     }
 
     @Override
@@ -240,7 +220,7 @@ public class GameModel implements aima.core.search.adversarial.Game<CustomState,
                     }else break;
                 }
             }catch (Exception e){
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }
         return legalMoves;

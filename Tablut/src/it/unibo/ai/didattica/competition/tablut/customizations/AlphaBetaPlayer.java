@@ -12,7 +12,6 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
 
     long evalTime = 0;
     long[] evalCounter = {0L, 0L};
-    int counter = 0;
     int startWhitePieces = 0;
     int startBlackPieces = 0;
     Boolean foundWin = false;
@@ -61,10 +60,6 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
 
     @Override
     public double eval(CustomState state, State.Turn player) {
-        /*if(this.counter%100000==0){ // ogni 100000 evaluation sovrascrive la hashmap local con quella aggiornata
-            this.game.getPlayers();
-        }
-        this.counter++;*/
         long start = System.currentTimeMillis();
         double captureEval = evalCapture(state);
         long startUtility = System.currentTimeMillis();
@@ -84,7 +79,6 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
 
     @Override
     public Action makeDecision(CustomState state) {
-        this.game.getPlayers();
         long startTime = System.currentTimeMillis();
         this.startWhitePieces = 0;
         this.startBlackPieces = 0;
@@ -127,12 +121,6 @@ public class AlphaBetaPlayer extends IterativeDeepeningAlphaBetaSearch<CustomSta
     @Override
     protected void incrementDepthLimit() {
         ++this.currDepthLimit;
-        /*System.out.println("Depth "+this.currDepthLimit+", total time to evaluate states: "+this.evalTime);
-        System.out.println("Time to evaluate captures: "+this.evalCounter[0]+", time to evaluate utility: "+this.evalCounter[1]);
-        this.game.getInitialState();
-        this.evalTime = 0;
-        this.evalCounter[0] = 0L;
-        this.evalCounter[1] = 0L;*/
     }
 
     public long getTimeInSeconds(long startTime){
